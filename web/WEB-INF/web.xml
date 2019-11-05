@@ -46,4 +46,13 @@
         <url-pattern>/keygen</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>webapp.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+
 </web-app>

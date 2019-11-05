@@ -1,25 +1,17 @@
 package webapp.utils;
 
+import javax.crypto.*;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.ByteBuffer;
-
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Properties;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 
 import static webapp.utils.AsyncCrypto.HMAC_SHA256;
 
@@ -29,6 +21,9 @@ public class CryptoUtils
 	private static final String TRANSFORMATION="AES";
 	private static Properties keySaltProp = null;
 	private static Properties fileKeyProp = null;
+
+	private static Properties privateKeyProp = null;
+	private static Properties publicKeyProp = null;
 
 	public static boolean encrypt(String key, String salt, File inputFile, File outputFile, byte[] hashofFile) throws Exception {
 
@@ -202,6 +197,37 @@ public class CryptoUtils
 	}
 
 
+
+	///////////////////////////////////////////////////////
+
+
+	public static  Properties getPrivateKeyProp() {
+		if(publicKeyProp == null) {
+			try {
+				publicKeyProp = new Properties();
+				InputStream in = CryptoUtils.class.getResourceAsStream("public_private.properties");
+
+				publicKeyProp.load(in);
+				in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return publicKeyProp;
+	}
+
+	public static  String getPrivateKeyFromFile(String fileName) {
+		return getPrivateKeyProp()!= null ? privateKeyProp.getProperty(fileName) : null;
+	}
+
+	public static void setPublicKey(String publicKey, String privatekey) throws IOException {
+		// if (getKeySaltProp()!=null){
+		privateKeyProp = getPrivateKeyProp();
+		privateKeyProp.setProperty(publicKey, privatekey);
+		OutputStream output = new FileOutputStream(CryptoUtils.class.getResource("public_private.properties").getPath());
+		privateKeyProp.store(output,null);
+
+	}
 
 
 

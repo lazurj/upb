@@ -8,86 +8,123 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Title</title>
+    <title>Files</title>
+    <title>Main</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
 </head>
 <body>
+<%@include file="navbar.jsp" %>
+<section class="section">
+    <div class="container">
 
-<div class="center" style="width: 50%; text-align: center">
-    <h2>List of uploaded files</h2>
-    <table>
-        <thead>
-        <th><b>Name</b></th>
-        <th><b>Lenght</b></th>
-        <th></th>
-        </thead>
-        <%-- Fetching the attributes of the request object
-             which was previously set by the servlet
-              "StudentServlet.java"
-        --%>
-        <%
 
-            String msg = (String) request.getAttribute("keymsg");
-            File[] files =
-                    (File[]) request.getAttribute("files");
+        <section class="section">
+            <div class="box">
 
-            if (files != null && files.length > 0) {
-                for (File file : files) {%>
-        <tbody>
-        <td><%=file.getName()%>
-        </td>
-        <td><%=file.length()%>
-        </td>
-        <td><%="<button onclick=\"document.getElementById('fileToDecrypt').value='" + file.getName() + "'\">Select<//button>"%>
-        </td>
+                <h2 class="title">List of uploaded files</h2>
+                <table class="table is-striped is-hoverable is-fullwidth" style="border: 2px solid #dbdbdb">
+                    <thead>
+                    <th>Name</th>
+                    <th>Length</th>
+                    <th></th>
+                    <th></th>
+                    </thead>
+                    <%-- Fetching the attributes of the request object
+                         which was previously set by the servlet
+                          "StudentServlet.java"
+                    --%>
+                    <%
 
-        <%
-                }
-            } else if(files != null) {%>
-        <td colspan="3" style="text-align: center"><strong>Folder is empty </strong></td>
-        <%
-                }
-        %>
-        </tbody>
+                        String msg = (String) request.getAttribute("keymsg");
+                        File[] files =
+                                (File[]) request.getAttribute("files");
 
-        <% if (msg != null && !msg.isEmpty()) {%>
-         <strong><%=msg%>
-    </strong><br>
-        <%}%>
-    </table>
-</div>
-<form style="width: 50%;" class="center" action="/decrypt" method="post">
-    <hr>
+                        if (files != null && files.length > 0) {
+                            for (File file : files) {%>
+                    <tbody>
+                    <td><%=file.getName()%>
+                    </td>
+                    <td><%=file.length()%>
+                    </td>
+                    <td><%="<button class=\"button\" onclick=\"document.getElementById('fileToDecrypt').value='" + file.getName() + "'\">Select<//button>"%>
+                    </td>
+                    <td><%="<form style=\"margin-block-end: 0;\" action=\"decrypt\" method=\"post\"><input type=\"hidden\" name=\"fileName\" value=\'" + file.getName() + "'><button class=\"button\" name= \"getHash\" type=\"submit\">Download hashkey<//button></form>"%>
+                    </td>
 
-    <div class="center" style="text-align: center; margin: 1em;">
-        <span><strong>Selected folder:</strong></span>
-        <input style="width: 50%;" class="read-only" id="fileToDecrypt" type="text" required name="fileToDecrypt"/><br>
-    </div>
-    <div style="display: flex">
-        <div style="display: inline-block; width: 50%; text-align: center">
-            <h3>Decryption:</h3>
-            <div>
-                <%--            <input type="text" name="key"/>--%>
-                <textarea style="height: 80px;" placeholder="Enter your private key to decrypy selected file..."
-                          name="key"></textarea></div>
-            <div><input style="width: 60%;" type="submit" name="decrypt" value="Decrypt"></div>
-        </div>
-        <div style="display: inline-block; width: 50%;">
-            <h3>Options:</h3>
-            <div style="display: flex">
-                <input style="width: 100%" type="submit" name="download" value="download">
-                <input style="width: 100%" type="submit" name="delete" value="delete">
+                    <%
+                        }
+                    } else if (files != null) {%>
+                    <td colspan="3" style="text-align: center"><strong>Folder is empty </strong></td>
+                    <%
+                        }
+                    %>
+                    </tbody>
+                </table>
+
+                <% if (msg != null && !msg.isEmpty()) {%>
+                <strong><%=msg%>
+                </strong><br>
+                <%}%>
+                <form action="decrypt" method="post">
+                    <div class="field is-horizontal">
+                        <div class="field-label is-normal">
+                            <label class="label">Selected folder:</label>
+                        </div>
+                        <div class="field-body">
+                            <div class="field">
+                                <input class="input" class="read-only" id="fileToDecrypt" type="text" required
+                                       name="fileToDecrypt"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field is-horizontal">
+                        <div class="field-label is-normal">
+                            <label class="label is-normal">Decryption:</label>
+                        </div>
+                        <div class="field-body">
+                            <div class="field">
+                                <div class="control">
+                                    <%--            <input type="text" name="key"/>--%>
+                                    <textarea class="textarea clear-bottom-radius" style="height: 80px;"
+                                              placeholder="Enter your private key to decrypy selected file..."
+                                              name="key"></textarea>
+                                </div>
+                                <button class="button is-dark is-fullwidth clear-top-radius" type="submit" name="decrypt"
+                                        value="Decrypt">
+                                    <span class="icon is-small"><i class="fas fa-unlock-alt"></i></span>
+                                    <span>Decrypt</span>
+                                    file
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field has-addons">
+                        <p class="control" style="width: 100%;">
+                            <button class="button is-dark is-fullwidth" type="submit" name="download"
+                                    value="download">
+                                <span class="icon is-small"><i class="fas fa-file-download"></i></span>
+                                <span>Download</span>
+                            </button>
+                        </p>
+                        <p class="control" style="width: 100%;">
+                            <button class="button is-dark is-fullwidth" type="submit" name="delete"
+                                    value="delete">
+                                <span class="icon is-small"><i class="fas fa-trash-alt"></i></span>
+                                <span>Delete</span>
+                            </button>
+                        </p>
+                    </div>
+                </form>
             </div>
-        </div>
+            <a class="button is-link is-fullwidth" class="link" href="./">Return</a>
+        </section>
+
     </div>
-
-</form>
-
-<div style="background: #b9c9fe; vertical-align: middle; padding: 1em; border-bottom: 4px solid #aabcfe;">
-    <a style="background: rgb(221, 221, 221); width: 180px;" class="link" href="/">Return</a>
-</div>
-
-<br>
+</section>
 </body>
 </html>

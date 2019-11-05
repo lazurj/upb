@@ -20,7 +20,7 @@ import java.util.List;
 import static webapp.utils.AsyncCrypto.HMAC_SHA256;
 
 public class FileUploadHandler extends HttpServlet {
-    public static String UPLOAD_DIRECTORY = "C:/Users/Jakub/Desktop/UPBWebApp/src/uploads";
+    public static String UPLOAD_DIRECTORY = "files";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -28,13 +28,15 @@ public class FileUploadHandler extends HttpServlet {
 
         //process only if its multipart content
         if(ServletFileUpload.isMultipartContent(request)){
+            File file = null;
             try {
+                File fileDir = new File(UPLOAD_DIRECTORY);
+                fileDir.mkdir();
                 List<FileItem> multiparts = new ServletFileUpload(
                         new DiskFileItemFactory()).parseRequest(request);
                 String name;
                 String fileName = "";
                 String publicKey = "";
-                File file = null;
                 for(FileItem item : multiparts){
                   //  if(!item.isFormField()){
 
@@ -75,7 +77,6 @@ public class FileUploadHandler extends HttpServlet {
 
                 //zasifrovanie sym kluca verejnym klucom
                 AsyncCrypto asyncCrypto = new AsyncCrypto();
-                publicKey = "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJGG4hnBvRqfqiHo8UGyfQiH/lSxhxqdVjqCsLsurEBrh9IwgUcgczDG359oKHJgcYYVVwElCbX4Zs82x1aKrckCAwEAAQ==";
                 byte[] encKey = asyncCrypto.encrypt(fullKey,asyncCrypto.getPublicKey(publicKey));
                 String encKeyValue = Base64.getEncoder().encodeToString(encKey);
 //                String encKeyValue = new String(encKey, "UTF-8");
@@ -97,27 +98,21 @@ public class FileUploadHandler extends HttpServlet {
                // String content1 = Base64.getEncoder().encodeToString(Files.readAllBytes(Paths.get(file.getPath())));
                 byte[] hashofFile = AsyncCrypto.hmacDigestBytes(content,"password",HMAC_SHA256);
 
-                if(CryptoUtils.encrypt(key, salt, file, encFile, hashofFile)){
-                    file.delete();
-                }
+                CryptoUtils.encrypt(key, salt, file, encFile, hashofFile);
+
                 //String test1 = AsyncCrypto.hmacDigest("fooo","password",HMAC_SHA256);
 
                 //byte[] test2 = AsyncCrypto.getSHA("foo");
-
-
-
-
-
-
-
-
-
 
                 request.setAttribute("keymsg", encKeyValue);
                 //File uploaded successfully
                 request.setAttribute("message", "File Uploaded Successfully");
             } catch (Exception ex) {
                 request.setAttribute("message", "File Upload Failed due to " + ex);
+            } finally {
+                if(file != null) {
+                    file.delete();
+                }
             }
 
         }else{

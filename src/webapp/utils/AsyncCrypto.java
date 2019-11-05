@@ -2,9 +2,6 @@ package webapp.utils;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -13,7 +10,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.Formatter;
 
 public class AsyncCrypto {
     private PrivateKey privatekey;
