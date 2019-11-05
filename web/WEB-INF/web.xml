@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+
+
+    <servlet>
+        <servlet-name>FilesShowServlet</servlet-name>
+        <servlet-class>webapp.FilesShowServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FilesShowServlet</servlet-name>
+        <url-pattern>/files</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <servlet>
+        <servlet-name>FileUploadHandler</servlet-name>
+        <servlet-class>webapp.FileUploadHandler</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FileUploadHandler</servlet-name>
+        <url-pattern>/upload</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DecryptServlet</servlet-name>
+        <servlet-class>webapp.DecryptServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DecryptServlet</servlet-name>
+        <url-pattern>/decrypt</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>KeygenServlet</servlet-name>
+        <servlet-class>webapp.KeygenServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>KeygenServlet</servlet-name>
+        <url-pattern>/keygen</url-pattern>
+    </servlet-mapping>
+
+</web-app>

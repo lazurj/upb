@@ -1,0 +1,79 @@
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+input, button, textarea, .link {
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    border: 1px solid rgb(200, 200, 200);
+    color: rgb(64, 64, 64);
+}
+
+.link {
+    display: inline-block;
+    background: rgb(221, 221, 221);
+    text-decoration: none;
+}
+
+input:not(:first-child), button:not(:first-child), textarea:not(:first-child), .link:not(:first-child){
+    margin-left: 0.5em;
+}
+
+.read-only {
+    border-width: 0;
+    border-bottom: 1px solid rgb(200, 200, 200);
+}
+
+button {
+    width: 100%;
+    display: inline-block;
+}
+
+textarea {
+    min-width: 80px;
+    min-height: 40px;
+    max-width: 100%;
+    width: 60%;
+}
+
+.center {
+    margin: 0 auto;
+}
+
+table {
+    /*border: 1px solid black;*/
+    width: 100%;
+    margin: 1em auto;
+    border-width: 0;
+    /*border-top: 3px solid*/
+    border-collapse: collapse;
+}
+
+table tr {
+    border-bottom: 1px solid #ddd;
+    border-spacing: 0;
+}
+
+table th {
+    font-size: 13px;
+    font-weight: 400;
+    background: #b9c9fe;
+    border-top: 4px solid #aabcfe;
+    border-bottom: 1px solid #fff;
+    color: #039;
+    padding: 8px;
+    text-align: left;
+}
+
+table td {
+    background: #e8edff;
+    border-bottom: 1px solid #fff;
+    color: #669;
+    border-top: 1px solid transparent;
+    padding: 8px;
+}
+
+div {
+    margin: 0.25em;
+}
