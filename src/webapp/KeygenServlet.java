@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 
@@ -73,6 +74,15 @@ public class KeygenServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        Long UserID = (Long)session.getAttribute("loggedUser");
+
+        if(UserID == null)
+        {
+            response.sendRedirect("/login");
+            //request.getRequestDispatcher("/login.jsp").forward(request, response);
+            return;
+        }
 
         try {
             AsyncCrypto asyncCrypto = new AsyncCrypto();

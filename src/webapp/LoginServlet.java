@@ -6,10 +6,7 @@ import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -97,6 +94,10 @@ public class LoginServlet extends HttpServlet {
 
                 if (hashPassordString.equals(user.getPassword())){
                     request.setAttribute("loggedIn", true);
+
+                    HttpSession session = request.getSession();
+                    session.setMaxInactiveInterval(45 * 60); //Zivotnost - 45 minut
+                    session.setAttribute("loggedUser", user.getId());
                 request.getRequestDispatcher("/login.jsp").forward(request, response);
                 }
             }
@@ -112,7 +113,8 @@ public class LoginServlet extends HttpServlet {
         }
 
         if (isLogout != null) {
-
+            HttpSession session = request.getSession(false);
+            session.invalidate();
         }
         //request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
@@ -127,6 +129,18 @@ public class LoginServlet extends HttpServlet {
             }
         }
         return false;
+
+        /*
+        HttpSession session = request.getSession(false);
+        Long UserID = (Long)session.getAttribute("loggedUser");
+
+        if(UserID == null)
+            return false;
+        else
+            return true;
+
+         return true;
+         */
     }
 
 }
