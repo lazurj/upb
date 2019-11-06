@@ -32,7 +32,7 @@ public class Database {
             statement.executeUpdate("drop table if exists user");
             statement.executeUpdate("create table user (id integer PRIMARY KEY, username string NOT NULL, password string NOT NULL, salt string NOT NULL, private_key string NOT NULL, public_key string NOT NULL)");
             statement.executeUpdate("insert into user values(1, 'leo', 'password', 'salt', 'awd', 'awd')");
-            statement.executeUpdate("insert into user values(2, 'admin', 'pass', 'salt2', 'awd', 'awd')");
+            statement.executeUpdate("insert into user values(2, 'admin', 'EL5h9EpBFGjo9lr3k3K7uBlJ7g1oQ4O/9bXP6AlIx+0=', 'salt2', 'awd', 'awd')");
  //         statement.executeUpdate("insert into user values(2, 'yui')");
             /*ResultSet rs = statement.executeQuery("select * from person");
             while (rs.next()) {

@@ -2,6 +2,8 @@ package webapp;
 
 import database.Database;
 import database.dto.User;
+import webapp.utils.AsyncCrypto;
+import webapp.utils.CryptoUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -9,6 +11,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Base64;
+
+import static webapp.utils.AsyncCrypto.HMAC_SHA256;
 
 public class LoginServlet extends HttpServlet {
     private final String testUser = "admin";
@@ -52,19 +60,37 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         if (isLogin != null) {
-            if (testUser.equals(username) && testPass.equals(password)) {
-                Cookie loginCookie = new Cookie("username", username);
-                loginCookie.setMaxAge(45 * 60); //Zivotnost - 45 minut
-                response.addCookie(loginCookie);
-                request.setAttribute("loggedIn", true);
-                request.getRequestDispatcher("/login.jsp").forward(request, response);
-            } else {
-                request.setAttribute("badCredentials", true);
-                User user = Database.findUserByName(username);
-                user.getId();
+//            if (testUser.equals(username) && testPass.equals(password)) {
+//                Cookie loginCookie = new Cookie("username", username);
+//                loginCookie.setMaxAge(45 * 60); //Zivotnost - 45 minut
+//                response.addCookie(loginCookie);
+//                request.setAttribute("loggedIn", true);
+//                request.getRequestDispatcher("/login.jsp").forward(request, response);
+//            } else {
+//                request.setAttribute("badCredentials", true);
+//                User user = Database.findUserByName(username);
+//                user.getId();
+//            }
+
+            User user = Database.findUserByName(username);
+            if (user != null){
+               String salt = user.getSalt();
+
+                byte[] hashPassword = AsyncCrypto.hmacDigestBytes(password,salt,HMAC_SHA256);
+                String hashPassordString = Base64.getEncoder().encodeToString(hashPassword);
+
+                if (hashPassordString.equals(user.getPassword())){
+                    System.out.println("yes");
+                }
             }
+
+
+
+
+
+
         } else {
-//            response.sendRedirect("/index");
+            response.sendRedirect("/login");
 
         }
 
