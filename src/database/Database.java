@@ -3,9 +3,15 @@ package database;
 import database.dto.User;
 import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
+import webapp.utils.AsyncCrypto;
+import webapp.utils.CryptoUtils;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
+import java.util.Base64;
 import java.util.List;
+
+import static webapp.utils.AsyncCrypto.HMAC_SHA256;
 
 /**
  * Created by Jakub on 6.11.2019.
@@ -15,7 +21,8 @@ public class Database {
     private static synchronized Connection getConnection () {
         try {
             Class.forName("org.sqlite.JDBC");
-            return DriverManager.getConnection("jdbc:sqlite:sample.db");
+            //TODO prepis si cestu
+            return DriverManager.getConnection("jdbc:sqlite:C:/Users/Rastik/Desktop/UPB/sample.db");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
@@ -30,12 +37,11 @@ public class Database {
             Statement statement = getConnection().createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
-            statement.executeUpdate("drop table if exists user");
-            statement.executeUpdate("create table if not exists user (id integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username string NOT NULL, password string NOT NULL, salt string NOT NULL, private_key string NOT NULL, public_key string NOT NULL)");
-            statement.executeUpdate("create table if not exists file_info (id integer PRIMARY KEY NOT NULL AUTO_INCREMENT, file_name string NOT NULL, mac string NOT NULL)");
-            statement.executeUpdate("create table if not exists user_file (id integer PRIMARY KEY NOT NULL AUTO_INCREMENT, file_info_id integer FOREIGN KEY REFERENCES file_info(id), user_id integer FOREIGN KEY REFERENCES user(id), hash_key string NOT NULL)");
-            statement.executeUpdate("insert into user values(1, 'leo', 'password', 'salt', 'awd', 'awd')");
-            statement.executeUpdate("insert into user values(2, 'admin', 'EL5h9EpBFGjo9lr3k3K7uBlJ7g1oQ4O/9bXP6AlIx+0=', 'salt2', 'awd', 'awd')");
+            statement.executeUpdate("create table if not exists user (id integer PRIMARY KEY AUTOINCREMENT, username string NOT NULL, password string NOT NULL, salt string NOT NULL, private_key string NOT NULL, public_key string NOT NULL, email string NOT NULL)");
+            statement.executeUpdate("create table if not exists file_info (id integer PRIMARY KEY AUTOINCREMENT, file_name string NOT NULL, mac string NOT NULL)");
+            statement.executeUpdate("create table if not exists user_file (id integer PRIMARY KEY AUTOINCREMENT, file_info_id integer NOT NULL, user_id integer NOT NULL,hash_key string NOT NULL, FOREIGN KEY(user_id) REFERENCES user(id),FOREIGN KEY(file_info_id) REFERENCES file_info(id))");
+            statement.executeUpdate("insert into user values(1,'leo', 'password', 'salt', 'awd', 'awd','asdf')");
+            statement.executeUpdate("insert into user values(2,'admin', 'EL5h9EpBFGjo9lr3k3K7uBlJ7g1oQ4O/9bXP6AlIx+0=', 'salt2', 'awd', 'awd','asdf')");
  //         statement.executeUpdate("insert into user values(2, 'yui')");
             /*ResultSet rs = statement.executeQuery("select * from person");
             while (rs.next()) {
@@ -118,4 +124,39 @@ public class Database {
         }
         return null;
     }
+
+    public static void insertUser(String username, String password, String email){
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("INSERT INTO user (username, password, email, salt, public_key, private_key) VALUES (?,?,?,?,?,?)");
+
+
+
+            String salt = CryptoUtils.generateRandomKey(18);
+            byte[] hashPassword = AsyncCrypto.hmacDigestBytes(password,salt,HMAC_SHA256);
+            String hashPassordString = Base64.getEncoder().encodeToString(hashPassword);
+
+            AsyncCrypto asyncCrypto = new AsyncCrypto();
+
+
+
+            ps.setString(1,username);
+            ps.setString(2,hashPassordString);
+            ps.setString(3,email);
+            ps.setString(4,salt);
+            ps.setString(5,asyncCrypto.PublicKeyString());
+            ps.setString(6,asyncCrypto.PrivateKeyString());
+            ps.executeUpdate();
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
 }

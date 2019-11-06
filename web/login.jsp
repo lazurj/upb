@@ -170,8 +170,8 @@
                             <label class="label"></label>
                         </div>
                         <div class="field-body">
-                            <button class="button is-link is-fullwidth" type="submit" name="delete"
-                                    value="delete">
+                            <button class="button is-link is-fullwidth" type="submit" name="register"
+                                    value="register">
                                 <span class="icon is-small"><i class="fas fa-user-check"></i></span>
                                 <span>Register</span>
                             </button>

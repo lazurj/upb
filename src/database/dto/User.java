@@ -11,6 +11,7 @@ public class User {
     private String salt;
     private String privateKey;
     private String publicKey;
+    private String email;
 
 
     public Long getId() {
@@ -61,4 +62,11 @@ public class User {
         this.publicKey = publicKey;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

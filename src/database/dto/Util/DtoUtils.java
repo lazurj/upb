@@ -28,6 +28,7 @@ public class DtoUtils {
                 u.setPrivateKey(rs.getString("private_key"));
                 u.setPublicKey(rs.getString("public_key"));
                 u.setSalt(rs.getString("salt"));
+                u.setEmail(rs.getString("email"));
                 result.add(u);
             }
         } catch (SQLException e) {

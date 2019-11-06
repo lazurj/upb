@@ -55,9 +55,25 @@ public class LoginServlet extends HttpServlet {
 
         String isLogin = request.getParameter("login");
         String isLogout = request.getParameter("logout");
+        String isRegister = request.getParameter("register");
 
         String username = request.getParameter("username");
         String password = request.getParameter("password");
+
+
+        if (isRegister != null){
+         String password1 = request.getParameter("password2");
+         String email = request.getParameter("email");
+
+         if (!password.equals(password1) || Database.findUserByName(username) != null){
+             response.sendRedirect("/login");
+         }
+
+         Database.insertUser(username,password,email);
+
+
+        }
+
 
         if (isLogin != null) {
 //            if (testUser.equals(username) && testPass.equals(password)) {
@@ -80,24 +96,25 @@ public class LoginServlet extends HttpServlet {
                 String hashPassordString = Base64.getEncoder().encodeToString(hashPassword);
 
                 if (hashPassordString.equals(user.getPassword())){
-                    System.out.println("yes");
+                    request.setAttribute("loggedIn", true);
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
                 }
             }
 
 
 
 
-
+            response.sendRedirect("/login");
 
         } else {
-            response.sendRedirect("/login");
+            //response.sendRedirect("/login");
 
         }
 
         if (isLogout != null) {
 
         }
-        request.getRequestDispatcher("/login.jsp").forward(request, response);
+        //request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 
     private boolean isLogedIn(HttpServletRequest request) {
