@@ -1,6 +1,7 @@
 package webapp;
 
-import jdk.nashorn.internal.ir.RuntimeNode;
+import database.Database;
+import database.dto.User;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -18,6 +19,7 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         String isLogout = request.getParameter("logout");
 
+        Database.createNewDatabase("upb.db");
         if (isLogout != null) {
             Cookie[] cookies = request.getCookies();
             Cookie loginCookie = null;
@@ -58,6 +60,8 @@ public class LoginServlet extends HttpServlet {
                 request.getRequestDispatcher("/login.jsp").forward(request, response);
             } else {
                 request.setAttribute("badCredentials", true);
+                User user = Database.findUserByName(username);
+                user.getId();
             }
         } else {
 //            response.sendRedirect("/index");
