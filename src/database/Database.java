@@ -1,6 +1,7 @@
 package database;
 
 import database.dto.User;
+import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
 
 import java.sql.*;
@@ -30,7 +31,9 @@ public class Database {
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
             statement.executeUpdate("drop table if exists user");
-            statement.executeUpdate("create table user (id integer PRIMARY KEY, username string NOT NULL, password string NOT NULL, salt string NOT NULL, private_key string NOT NULL, public_key string NOT NULL)");
+            statement.executeUpdate("create table if not exists user (id integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username string NOT NULL, password string NOT NULL, salt string NOT NULL, private_key string NOT NULL, public_key string NOT NULL)");
+            statement.executeUpdate("create table if not exists file_info (id integer PRIMARY KEY NOT NULL AUTO_INCREMENT, file_name string NOT NULL, mac string NOT NULL)");
+            statement.executeUpdate("create table if not exists user_file (id integer PRIMARY KEY NOT NULL AUTO_INCREMENT, file_info_id integer FOREIGN KEY REFERENCES file_info(id), user_id integer FOREIGN KEY REFERENCES user(id), hash_key string NOT NULL)");
             statement.executeUpdate("insert into user values(1, 'leo', 'password', 'salt', 'awd', 'awd')");
             statement.executeUpdate("insert into user values(2, 'admin', 'EL5h9EpBFGjo9lr3k3K7uBlJ7g1oQ4O/9bXP6AlIx+0=', 'salt2', 'awd', 'awd')");
  //         statement.executeUpdate("insert into user values(2, 'yui')");
@@ -95,6 +98,21 @@ public class Database {
             ResultSet rs = ps.executeQuery();
             List<User> users = DtoUtils.convertToUser(rs);
             return !users.isEmpty() ? users.get(0) : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static List<UserFileInfo> findUserFilesByUserId(Long userId) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from user_file_info uf)" +
+                    " join user u on uf.user_id = u.id" +
+                    " join file_info fi on uf.file_id= fi.id" +
+                    " where userId= ?");
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            return DtoUtils.convertToUserFileInfo(rs);
         } catch (SQLException e) {
             e.printStackTrace();
         }

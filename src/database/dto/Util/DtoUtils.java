@@ -1,6 +1,8 @@
 package database.dto.Util;
 
+import database.dto.FileInfo;
 import database.dto.User;
+import database.dto.UserFileInfo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,6 +29,44 @@ public class DtoUtils {
                 u.setPublicKey(rs.getString("public_key"));
                 u.setSalt(rs.getString("salt"));
                 result.add(u);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static List<FileInfo> convertToFileInfo(ResultSet rs) {
+        List<FileInfo> result = new ArrayList<>();
+        if(rs == null) {
+            return result;
+        }
+        try {
+            while (rs.next()) {
+                FileInfo fi = new FileInfo();
+                fi.setId(rs.getLong("id"));
+                fi.setFileName(rs.getString("file_name"));
+                fi.setMac(rs.getString("mac"));
+                result.add(fi);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static List<UserFileInfo> convertToUserFileInfo(ResultSet rs) {
+        List<UserFileInfo> result = new ArrayList<>();
+        if(rs == null) {
+            return result;
+        }
+        try {
+            while (rs.next()) {
+                UserFileInfo ufi = new UserFileInfo();
+                ufi.setId(rs.getLong("id"));
+                /*ufi.setFileName(rs.getString("file_name"));
+                ufi.setMac(rs.getString("mac"));*/
+                result.add(ufi);
             }
         } catch (SQLException e) {
             e.printStackTrace();
