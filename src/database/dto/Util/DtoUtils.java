@@ -4,6 +4,7 @@ import database.dto.FileInfo;
 import database.dto.User;
 import database.dto.UserFileInfo;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -65,12 +66,21 @@ public class DtoUtils {
             while (rs.next()) {
                 UserFileInfo ufi = new UserFileInfo();
                 ufi.setId(rs.getLong("id"));
-                /*ufi.setFileName(rs.getString("file_name"));
-                ufi.setMac(rs.getString("mac"));*/
+                ufi.setUserId(rs.getLong("user_id"));
+                ufi.setFileInfoId(rs.getLong("file_info_id"));
+                ufi.setHashKey(rs.getString("hash_key"));
                 result.add(ufi);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static List<File> getUserFiles(List<UserFileInfo> userFiles) {
+        List<File> result = new ArrayList<>();
+        for (UserFileInfo userFile : userFiles) {
+            result.add(userFile.getFileInfo().getFile());
         }
         return result;
     }

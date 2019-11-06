@@ -1,5 +1,6 @@
 package database;
 
+import database.dto.FileInfo;
 import database.dto.User;
 import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
@@ -110,15 +111,42 @@ public class Database {
         return null;
     }
 
+    public static User findUserById(Long id) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from user where id = ?");
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+            List<User> users = DtoUtils.convertToUser(rs);
+            return !users.isEmpty() ? users.get(0) : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static FileInfo findFileInfoById(Long id) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from file_info where id = ?");
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+            List<FileInfo> files = DtoUtils.convertToFileInfo(rs);
+            return !files.isEmpty() ? files.get(0) : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static List<UserFileInfo> findUserFilesByUserId(Long userId) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement("select * from user_file_info uf)" +
-                    " join user u on uf.user_id = u.id" +
-                    " join file_info fi on uf.file_id= fi.id" +
-                    " where userId= ?");
+            PreparedStatement ps = getConnection().prepareStatement("select * from user_file_info where user_id= ?");
             ps.setLong(1, userId);
             ResultSet rs = ps.executeQuery();
-            return DtoUtils.convertToUserFileInfo(rs);
+            List<UserFileInfo> results = DtoUtils.convertToUserFileInfo(rs);
+            for(UserFileInfo result : results) {
+                result.setUser(findUserById(result.getUserId()));
+                result.setFileInfo(findFileInfoById(result.getFileInfoId()));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

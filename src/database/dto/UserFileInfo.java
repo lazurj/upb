@@ -6,6 +6,8 @@ package database.dto;
 public class UserFileInfo {
 
     Long id;
+    Long userId;
+    Long fileInfoId;
     User user;
     FileInfo fileInfo;
     String hashKey;
@@ -16,6 +18,22 @@ public class UserFileInfo {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getFileInfoId() {
+        return fileInfoId;
+    }
+
+    public void setFileInfoId(Long fileInfoId) {
+        this.fileInfoId = fileInfoId;
     }
 
     public User getUser() {

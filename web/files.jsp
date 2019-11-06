@@ -39,10 +39,10 @@
                     <%
 
                         String msg = (String) request.getAttribute("keymsg");
-                        File[] files =
-                                (File[]) request.getAttribute("files");
+                        List<File> files =
+                                (List<File>) request.getAttribute("files");
 
-                        if (files != null && files.length > 0) {
+                        if (files != null && files.size() > 0) {
                             for (File file : files) {%>
                     <tbody>
                     <td><%=file.getName()%>
