@@ -8,8 +8,10 @@ public class UserFileInfo {
     Long id;
     Long userId;
     Long fileInfoId;
+    Long userKeyId;
     User user;
     FileInfo fileInfo;
+    UserKey userKey;
     String hashKey;
 
     public Long getId() {
@@ -58,5 +60,21 @@ public class UserFileInfo {
 
     public void setHashKey(String hashKey) {
         this.hashKey = hashKey;
+    }
+
+    public Long getUserKeyId() {
+        return userKeyId;
+    }
+
+    public void setUserKeyId(Long userKeyId) {
+        this.userKeyId = userKeyId;
+    }
+
+    public UserKey getUserKey() {
+        return userKey;
+    }
+
+    public void setUserKey(UserKey userKey) {
+        this.userKey = userKey;
     }
 }

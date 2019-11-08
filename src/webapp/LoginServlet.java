@@ -3,14 +3,11 @@ package webapp;
 import database.Database;
 import database.dto.User;
 import webapp.utils.AsyncCrypto;
-import webapp.utils.CryptoUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Base64;
 
 import static webapp.utils.AsyncCrypto.HMAC_SHA256;
@@ -59,16 +56,16 @@ public class LoginServlet extends HttpServlet {
 
 
         if (isRegister != null){
-         String password1 = request.getParameter("password2");
-         String email = request.getParameter("email");
-
-         if (!password.equals(password1) || Database.findUserByName(username) != null){
-             response.sendRedirect("/login");
-         }
-
-         Database.insertUser(username,password,email);
-
-
+            String password1 = request.getParameter("password2");
+            String email = request.getParameter("email");
+            if (!password.equals(password1) || Database.findUserByName(username) != null){
+                 response.sendRedirect("/login");
+            }
+            Long userId = Database.insertUser(username,password,email);
+            User newUser = Database.findUserById(userId);
+            Database.insertUserKey(userId);
+            File userDir = new File(newUser.getDirectory());
+            userDir.mkdir();
         }
 
 
@@ -94,17 +91,12 @@ public class LoginServlet extends HttpServlet {
 
                 if (hashPassordString.equals(user.getPassword())){
                     request.setAttribute("loggedIn", true);
-
                     HttpSession session = request.getSession();
                     session.setMaxInactiveInterval(45 * 60); //Zivotnost - 45 minut
                     session.setAttribute("loggedUser", user.getId());
-                request.getRequestDispatcher("/login.jsp").forward(request, response);
+                    request.getRequestDispatcher("/login.jsp").forward(request, response);
                 }
             }
-
-
-
-
             response.sendRedirect("/login");
 
         } else {

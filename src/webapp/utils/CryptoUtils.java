@@ -30,7 +30,6 @@ public class CryptoUtils
 
 		boolean pass = false;
 
-
 		pass = doCrypto(Cipher.ENCRYPT_MODE, key, salt, inputFile, outputFile);
 		if (!pass){
 			return false;

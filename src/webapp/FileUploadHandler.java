@@ -1,5 +1,11 @@
 package webapp;
 
+import database.Database;
+import database.dto.FileInfo;
+import database.dto.User;
+import database.dto.UserFileInfo;
+import database.dto.UserKey;
+import database.dto.Util.DtoUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -26,6 +32,12 @@ public class FileUploadHandler extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        User loggedUser = DtoUtils.getLoggedUser(request);
+        if(loggedUser  == null) {
+            response.sendRedirect("/login");
+            //request.getRequestDispatcher("/login.jsp").forward(request, response);
+            return;
+        }
         //process only if its multipart content
         if(ServletFileUpload.isMultipartContent(request)){
             File file = null;
@@ -45,46 +57,40 @@ public class FileUploadHandler extends HttpServlet {
                         if ("file".equals(fieldName)){
 
                             name = item.getName();
-                            file = new File(UPLOAD_DIRECTORY + File.separator + name);
+                            file = new File(loggedUser.getDirectory() +File.separator + name);
                             item.write(file);
                             fileName = file.getName();
-
-                        }
-                        else if ("publicKey".equals(fieldName)){
-                            publicKey = item.getString();
 
                         }
                        // item.write( new File(UPLOAD_DIRECTORY + File.separator + name));
                     //}
                 }
-                File encFile = new File (UPLOAD_DIRECTORY + File.separator +"enc_"+ fileName);
+                File encFile = new File (loggedUser.getDirectory() + File.separator +"enc_"+ fileName);
                 //generovanie symetrickeho kluca
                 String key = CryptoUtils.generateRandomKey(16);
                 String salt = CryptoUtils.generateRandomKey(18);
                 String fullKey = key + salt;
                 //zasifrovanie sym kluca verejnym klucom
                 AsyncCrypto asyncCrypto = new AsyncCrypto();
-                byte[] encKey = asyncCrypto.encrypt(fullKey,asyncCrypto.getPublicKey(publicKey));
+                UserKey userKey = Database.findMaxUserKeyByUserId(loggedUser.getId());
+                byte[] encKey = asyncCrypto.encrypt(fullKey,asyncCrypto.getPublicKey(userKey.getPublicKey()));
                 String encKeyValue = Base64.getEncoder().encodeToString(encKey);
 //                String encKeyValue = new String(encKey, "UTF-8");
 //                String encKeyValue = Base64.getDecoder().decode(encKey);
                // String encKeyValue = new String(encKey);
              //   encKeyValue =new String(encKey, StandardCharsets.UTF_8);
 
-                CryptoUtils.setKey(encFile.getName() ,encKeyValue);
-                //CryptoUtils.setSalt(key, salt);
-
+                Database.insertFile(encFile.getName(), "mac");
+                FileInfo fileInfo = Database.findFileInfoByName(encFile.getName());
+                Database.insertUserFile(loggedUser.getId(), fileInfo.getId(),userKey.getId(),encKeyValue );
                 String content = new String(Files.readAllBytes(Paths.get(file.getPath())));
 
                // String content1 = Base64.getEncoder().encodeToString(Files.readAllBytes(Paths.get(file.getPath())));
                 byte[] hashofFile = AsyncCrypto.hmacDigestBytes(content,"password",HMAC_SHA256);
-
                 CryptoUtils.encrypt(key, salt, file, encFile, hashofFile);
 
                 //String test1 = AsyncCrypto.hmacDigest("fooo","password",HMAC_SHA256);
-
                 //byte[] test2 = AsyncCrypto.getSHA("foo");
-
                 request.setAttribute("keymsg", encKeyValue);
                 //File uploaded successfully
                 request.setAttribute("message", "File Uploaded Successfully");
@@ -95,23 +101,12 @@ public class FileUploadHandler extends HttpServlet {
                     file.delete();
                 }
             }
-
         }else{
             request.setAttribute("message",
                     "Sorry this Servlet only handles file upload request");
         }
-
-
-        File[] files = new File(UPLOAD_DIRECTORY).listFiles();
-
-        request.setAttribute("files", files);
-
+        List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser .getId());
+        request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
         request.getRequestDispatcher("/files.jsp").forward(request, response);
-
     }
-
-
-
-
-
 }

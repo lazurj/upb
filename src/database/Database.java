@@ -3,6 +3,7 @@ package database;
 import database.dto.FileInfo;
 import database.dto.User;
 import database.dto.UserFileInfo;
+import database.dto.UserKey;
 import database.dto.Util.DtoUtils;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
@@ -23,9 +24,8 @@ public class Database {
         try {
             Class.forName("org.sqlite.JDBC");
             //TODO prepis si cestu
-
-            //return DriverManager.getConnection("jdbc:sqlite:C:/Users/Rastik/Desktop/UPB/sample.db");
-            return DriverManager.getConnection("jdbc:sqlite:C:/Users/Domin/OneDrive/Plocha/upb-master/sample.db");
+            return DriverManager.getConnection("jdbc:sqlite:C:/Users/Jakub/Desktop/UPB/sample.db");
+            //return DriverManager.getConnection("jdbc:sqlite:C:/Users/Domin/OneDrive/Plocha/upb-master/sample.db");
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -41,12 +41,15 @@ public class Database {
             Statement statement = getConnection().createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
-            statement.executeUpdate("create table if not exists user (id integer PRIMARY KEY AUTOINCREMENT, username string NOT NULL, password string NOT NULL, salt string NOT NULL, private_key string NOT NULL, public_key string NOT NULL, email string NOT NULL)");
+            statement.executeUpdate("create table if not exists user (id integer PRIMARY KEY AUTOINCREMENT, username string NOT NULL, password string NOT NULL, salt string NOT NULL, email string NOT NULL)");
             statement.executeUpdate("create table if not exists file_info (id integer PRIMARY KEY AUTOINCREMENT, file_name string NOT NULL, mac string NOT NULL)");
-            statement.executeUpdate("create table if not exists user_file (id integer PRIMARY KEY AUTOINCREMENT, file_info_id integer NOT NULL, user_id integer NOT NULL,hash_key string NOT NULL, FOREIGN KEY(user_id) REFERENCES user(id),FOREIGN KEY(file_info_id) REFERENCES file_info(id))");
-            statement.executeUpdate("insert into user values(1,'leo', 'password', 'salt', 'awd', 'awd','asdf')");
-            statement.executeUpdate("insert into user values(2,'admin', 'EL5h9EpBFGjo9lr3k3K7uBlJ7g1oQ4O/9bXP6AlIx+0=', 'salt2', 'awd', 'awd','asdf')");
- //         statement.executeUpdate("insert into user values(2, 'yui')");
+            statement.executeUpdate("create table if not exists user_file (id integer PRIMARY KEY AUTOINCREMENT, file_info_id integer NOT NULL, user_id integer NOT NULL, user_key_id integer NOT NULL, hash_key string NOT NULL, FOREIGN KEY(user_id) REFERENCES user(id),FOREIGN KEY(file_info_id) REFERENCES file_info(id), FOREIGN KEY(user_key_id) REFERENCES user_key(id))");
+            statement.executeUpdate("create table if not exists user_key (id integer PRIMARY KEY AUTOINCREMENT, user_id integer NOT NULL, private_key string NOT NULL, public_key string NOT NULL, FOREIGN KEY(user_id) REFERENCES user(id))");
+
+            //statement.executeUpdate("insert into user values(1,'leo', 'password', 'salt', 'awd', 'awd','asdf')");
+            //statement.executeUpdate("insert into user values(2,'admin', 'EL5h9EpBFGjo9lr3k3K7uBlJ7g1oQ4O/9bXP6AlIx+0=', 'salt2', 'awd', 'awd','asdf')");
+            //statement.executeUpdate("insert into file_info values(1,'leo', 'password', 'salt', 'awd', 'awd','asdf')");
+            //statement.executeUpdate("insert into user values(2, 'yui')");
             /*ResultSet rs = statement.executeQuery("select * from person");
             while (rs.next()) {
                 // read the result set
@@ -140,54 +143,144 @@ public class Database {
         return null;
     }
 
-    public static List<UserFileInfo> findUserFilesByUserId(Long userId) {
+    public static UserKey findUserKeyById(Long id) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement("select * from user_file_info where user_id= ?");
-            ps.setLong(1, userId);
+            PreparedStatement ps = getConnection().prepareStatement("select * from user_key where id = ?");
+            ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
-            List<UserFileInfo> results = DtoUtils.convertToUserFileInfo(rs);
-            for(UserFileInfo result : results) {
-                result.setUser(findUserById(result.getUserId()));
-                result.setFileInfo(findFileInfoById(result.getFileInfoId()));
-            }
+            List<UserKey> keys = DtoUtils.convertToUserKey(rs);
+            return !keys.isEmpty() ? keys.get(0) : null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static void insertUser(String username, String password, String email){
+    public static UserKey findMaxUserKeyByUserId(Long userId) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement("INSERT INTO user (username, password, email, salt, public_key, private_key) VALUES (?,?,?,?,?,?)");
+            PreparedStatement ps = getConnection().prepareStatement("select * from user_key where user_id = ? order by id desc");
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            List<UserKey> keys = DtoUtils.convertToUserKey(rs);
+            return !keys.isEmpty() ? keys.get(0) : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
+    public static FileInfo findFileInfoByName(String fileName) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from file_info where file_name = ?");
+            ps.setString(1, fileName);
+            ResultSet rs = ps.executeQuery();
+            List<FileInfo> files = DtoUtils.convertToFileInfo(rs);
+            return !files.isEmpty() ? files.get(0) : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
+    public static List<UserFileInfo> findUserFilesByUserId(Long userId) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from user_file where user_id= ?");
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            List<UserFileInfo> results = DtoUtils.convertToUserFileInfo(rs);
+            for(UserFileInfo result : results) {
+                result.setUser(findUserById(result.getUserId()));
+                result.setFileInfo(findFileInfoById(result.getFileInfoId()));
+                result.setUserKey(findUserKeyById(result.getUserKeyId()));
+            }
+            return results;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Long insertUser(String username, String password, String email){
+        Long userId = null;
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("INSERT INTO user (username, password, email, salt) VALUES (?,?,?,?)",  Statement.RETURN_GENERATED_KEYS);
 
             String salt = CryptoUtils.generateRandomKey(18);
             byte[] hashPassword = AsyncCrypto.hmacDigestBytes(password,salt,HMAC_SHA256);
             String hashPassordString = Base64.getEncoder().encodeToString(hashPassword);
 
-            AsyncCrypto asyncCrypto = new AsyncCrypto();
-
-
-
             ps.setString(1,username);
             ps.setString(2,hashPassordString);
             ps.setString(3,email);
             ps.setString(4,salt);
-            ps.setString(5,asyncCrypto.PublicKeyString());
-            ps.setString(6,asyncCrypto.PrivateKeyString());
             ps.executeUpdate();
 
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    userId = generatedKeys.getLong(1);
+                }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return userId;
+    }
 
+    public static Long insertUserKey(Long userId){
+        Long id = null;
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("INSERT INTO user_key (user_id, public_key, private_key) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
+            AsyncCrypto asyncCrypto = new AsyncCrypto();
+            ps.setLong(1,userId);
+            ps.setString(2,asyncCrypto.PublicKeyString());
+            ps.setString(3,asyncCrypto.PrivateKeyString());
+            ps.executeUpdate();
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                id = generatedKeys.getLong(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-
-
+        return id;
     }
 
+    public static Long insertFile(String fileName, String mac){
+        Long fileId = null;
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("INSERT INTO file_info (file_name, mac) VALUES (?,?)", Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1,fileName);
+            ps.setString(2,mac);
+            ps.executeUpdate();
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                fileId = generatedKeys.getLong(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return fileId;
+    }
+
+    public static Long insertUserFile(Long userId, Long fileId, Long key_id, String hashKey) {
+        Long id = null;
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("INSERT INTO user_file (file_info_id, user_id, user_key_id, hash_key) VALUES (?,?,?,?)");
+            ps.setLong(1, fileId);
+            ps.setLong(2, userId);
+            ps.setLong(3, key_id);
+            ps.setString(4, hashKey);
+            ps.executeUpdate();
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (generatedKeys.next()) {
+             id = generatedKeys.getLong(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
 
 }

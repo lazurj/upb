@@ -22,7 +22,7 @@ public class FilesShowServlet extends HttpServlet {
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
-        List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser .getId());
+        List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
         request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
         request.getRequestDispatcher("/files.jsp").forward(request, response);
 

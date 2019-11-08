@@ -39,9 +39,9 @@ public class FileInfo {
         this.mac = mac;
     }
 
-    public File getFile() {
+    public File getFile(String userName) {
         if(file == null) {
-            file = new File(FileUploadHandler.UPLOAD_DIRECTORY + File.separator + this.fileName);
+            file = new File(FileUploadHandler.UPLOAD_DIRECTORY + File.separator + userName +File.separator +this.fileName);
         }
         return file;
     }

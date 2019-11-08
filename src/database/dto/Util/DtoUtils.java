@@ -4,6 +4,7 @@ import database.Database;
 import database.dto.FileInfo;
 import database.dto.User;
 import database.dto.UserFileInfo;
+import database.dto.UserKey;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -29,11 +30,31 @@ public class DtoUtils {
                 u.setId(rs.getLong("id"));
                 u.setPassword(rs.getString("password"));
                 u.setUserName(rs.getString("userName"));
-                u.setPrivateKey(rs.getString("private_key"));
-                u.setPublicKey(rs.getString("public_key"));
                 u.setSalt(rs.getString("salt"));
                 u.setEmail(rs.getString("email"));
                 result.add(u);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+
+    public static List<UserKey> convertToUserKey(ResultSet rs) {
+        List<UserKey> result = new ArrayList<>();
+        if(rs == null) {
+            return result;
+        }
+        try {
+            while (rs.next()) {
+                UserKey uk = new UserKey();
+                uk.setId(rs.getLong("id"));
+                uk.setPrivateKey(rs.getString("private_key"));
+                uk.setPublicKey(rs.getString("public_key"));
+                uk.setUserId(rs.getLong("user_id"));
+                result.add(uk);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -71,6 +92,7 @@ public class DtoUtils {
                 ufi.setId(rs.getLong("id"));
                 ufi.setUserId(rs.getLong("user_id"));
                 ufi.setFileInfoId(rs.getLong("file_info_id"));
+                ufi.setUserKeyId(rs.getLong("user_key_id"));
                 ufi.setHashKey(rs.getString("hash_key"));
                 result.add(ufi);
             }
@@ -83,9 +105,19 @@ public class DtoUtils {
     public static List<File> getUserFiles(List<UserFileInfo> userFiles) {
         List<File> result = new ArrayList<>();
         for (UserFileInfo userFile : userFiles) {
-            result.add(userFile.getFileInfo().getFile());
+            result.add(userFile.getFileInfo().getFile(userFile.getUser().getUserName()));
         }
         return result;
+    }
+
+
+    public static UserFileInfo getUserFileByName(List<UserFileInfo> userFiles, String fileName) {
+        for (UserFileInfo userFile : userFiles) {
+            if(fileName.equals(userFile.getFileInfo().getFileName())) {
+                return userFile;
+            }
+        }
+        return null;
     }
 
     public static User getLoggedUser(HttpServletRequest req) {

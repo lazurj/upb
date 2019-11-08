@@ -1,9 +1,15 @@
 package webapp;
 
+import database.Database;
+import database.dto.User;
+import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -11,20 +17,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.util.Arrays;
 import java.util.Base64;
 
 @WebServlet(name = "DecryptServlet")
 public class DecryptServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
-        if(DtoUtils.getLoggedUser(request) == null) {
+        User loggedUser = DtoUtils.getLoggedUser(request);
+        if(loggedUser == null) {
             response.sendRedirect("/login");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
 
-        if (request.getParameter("decrypt") != null) {
+        if (request.getParameter("download") != null) {
             String fileName = request.getParameter("fileToDecrypt");
             if("OfflineDec.jar".equals(fileName)) {
                 File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
@@ -38,16 +46,14 @@ public class DecryptServlet extends HttpServlet {
 
                 if (fileName != null && !fileName.isEmpty() && !"dec_".equals(fileNameSep) && "enc_".equals(fileNameSep)) {
                     wrongFile = false;
-                    File file = new File(FileUploadHandler.UPLOAD_DIRECTORY + File.separator + fileName);
-                    String privateKey = request.getParameter("key");
-                    privateKey = privateKey != null && !privateKey.isEmpty() ? privateKey : CryptoUtils.getKeyFromFile(fileName);
+                    UserFileInfo fileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), fileName);
+                    String privateKey = fileInfo.getUserKey().getPrivateKey();
+                    File decFile = null;
                     if (privateKey != null) {
                         AsyncCrypto ac = null;
                         try {
                             ac = new AsyncCrypto();
-                            String s = CryptoUtils.getKeyFromFile(fileName);
-    //                        byte[] data = s.getBytes("UTF-8");
-    //                        byte[] data = (Base64.getDecoder().decode(s));
+                            String s = fileInfo.getHashKey();
                             byte[] data = Base64.getDecoder().decode(s);
 
                             PrivateKey pk = ac.getPrivateKey(privateKey);
@@ -57,66 +63,47 @@ public class DecryptServlet extends HttpServlet {
                                 String keySalt = ac.decrypt(data, pk);
                                 if (keySalt != null) {
                                     fileName = fileName.substring(4, fileName.length());
-                                    File decFile = new File(FileUploadHandler.UPLOAD_DIRECTORY + File.separator + "dec_" + fileName);
-
-                                    if (CryptoUtils.decrypt(keySalt.substring(0, 16), keySalt.substring(16, 34), file, decFile)) {
-                                        file.delete();
+                                    decFile = new File(loggedUser.getDirectory() + File.separator + "dec_" + fileName);
+                                    if (CryptoUtils.decrypt(keySalt.substring(0, 16), keySalt.substring(16, 34), fileInfo.getFileInfo().getFile(loggedUser.getUserName()), decFile)) {
                                         request.setAttribute("keymsg", "Done. Integrity check OK.");
                                     } else {
                                         request.setAttribute("keymsg", "Your file was modified.");
                                     }
                                 }
                             }
-
+                        } catch (NoSuchAlgorithmException e) {
+                            e.printStackTrace();
+                        } catch (InvalidKeyException e) {
+                            e.printStackTrace();
+                        } catch (NoSuchPaddingException e) {
+                            e.printStackTrace();
+                        } catch (BadPaddingException e) {
+                            e.printStackTrace();
+                        } catch (IllegalBlockSizeException e) {
+                            e.printStackTrace();
                         } catch (Exception e) {
                             e.printStackTrace();
-                            File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
-                            request.setAttribute("keymsg", Arrays.toString(e.getStackTrace()));
-                            request.setAttribute("files", files);
-                            request.getRequestDispatcher("/files.jsp").forward(request, response);
-
                         }
                     }
+                    response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+                    OutputStream outFile = response.getOutputStream();
+                    FileInputStream in = new FileInputStream(decFile);
+                    byte[] buffer = new byte[4096];
+                    int length;
+                    while ((length = in.read(buffer)) > 0) {
+                        outFile.write(buffer, 0, length);
+                    }
+                    in.close();
+                    outFile.flush();
                 }
-                File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
-                if (badKey){
-                    request.setAttribute("keymsg","Please try another key.");
-                }
-                if (wrongFile){
-                    request.setAttribute("keymsg","Wrong file.");
-                }
-
-                request.setAttribute("files", files);
-                request.getRequestDispatcher("/files.jsp").forward(request, response);
             }
+        } else {
+            File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
+
+            request.setAttribute("files", files);
+            request.getRequestDispatcher("/files.jsp").forward(request, response);
         }
 
-        if (request.getParameter("download") != null) {
-            String fileName = request.getParameter("fileToDecrypt");
-
-            if (fileName != null && !fileName.isEmpty()) {
-                File file = new File(FileUploadHandler.UPLOAD_DIRECTORY + File.separator + fileName);
-
-                response.setHeader("Content-disposition", "attachment; filename=" + fileName);
-                OutputStream outFile = response.getOutputStream();
-                FileInputStream in = new FileInputStream(file);
-                byte[] buffer = new byte[4096];
-                int length;
-                while ((length = in.read(buffer)) > 0) {
-                    outFile.write(buffer, 0, length);
-                }
-                in.close();
-                outFile.flush();
-
-
-            } else {
-                File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
-
-                request.setAttribute("files", files);
-                request.getRequestDispatcher("/files.jsp").forward(request, response);
-            }
-
-        }
 
         if (request.getParameter("delete") != null) {
             String fileName = request.getParameter("fileToDecrypt");

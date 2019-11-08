@@ -38,7 +38,7 @@
                 <form style="text-align: center" action="upload" method="post" enctype="multipart/form-data">
                     <div class="file has-name is-fullwidth">
                         <label id="file-label clear-bottom-radius" class="file-label">
-                            <input class="file-input" required type="file" name="publicKey"
+                            <input class="file-input" required type="file" name="file"
                                    onchange="fileUploadHandler(this);">
                             <span class="file-cta clear-bottom-radius">
                                 <span class="file-icon">
@@ -53,7 +53,7 @@
                     </div>
                     <textarea class="textarea clear-radius" placeholder="Enter your pulbic key to encrypy selected file..."
                               name="publicKey"
-                              required></textarea>
+                              ></textarea>
                     <button class="button is-dark is-fullwidth clear-top-radius" value="upload">
                         <span class="icon is-small"><i class="fas fa-lock"></i></span>
                         <span>Upload file for encryption</span>

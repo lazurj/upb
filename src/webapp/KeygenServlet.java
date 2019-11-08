@@ -1,15 +1,15 @@
 package webapp;
 
+import database.Database;
 import database.dto.User;
+import database.dto.UserKey;
 import database.dto.Util.DtoUtils;
-import webapp.utils.AsyncCrypto;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.security.NoSuchAlgorithmException;
 
 public class KeygenServlet extends HttpServlet {
 
@@ -60,7 +60,8 @@ public class KeygenServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if(DtoUtils.getLoggedUser(request) == null) {
+        User user = DtoUtils.getLoggedUser(request);
+        if(user == null) {
             response.sendRedirect("/login");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
@@ -72,11 +73,10 @@ public class KeygenServlet extends HttpServlet {
 //            publicKey = asyncCrypto.PublicKeyString();
 
             //CryptoUtils.setpublicKey(publicKey,privateKey);
-            User user = DtoUtils.getLoggedUser(request);
-            String privateKey = user.getPrivateKey();
-            String publicKey = user.getPublicKey();
-            request.setAttribute("privateKey", privateKey);
-            request.setAttribute("publicKey", publicKey);
+
+            UserKey key = Database.findMaxUserKeyByUserId(user.getId());
+            request.setAttribute("privateKey", key.getPrivateKey());
+            request.setAttribute("publicKey", key.getPublicKey());
             request.getRequestDispatcher("/keygen.jsp").forward(request, response);
 
 

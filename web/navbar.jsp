@@ -1,5 +1,7 @@
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Arrays" %><%--
+<%@ page import="database.dto.User" %>
+<%@ page import="database.dto.Util.DtoUtils" %>
+<%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.List" %><%--
   Created by IntelliJ IDEA.
   User: kalan
   Date: 31. 10. 2019
@@ -51,13 +53,8 @@
                 <%--                <span>Logged as: <b>John Snow</b></span>--%>
                 <%
                     String username = null;
-                    Cookie[] cookies = request.getCookies();
-                    if (cookies != null) {
-                        for (Cookie cookie : cookies) {
-                            if (cookie.getName().equals("username"))
-                                username = cookie.getValue();
-                        }
-                    }
+                    User user = DtoUtils.getLoggedUser(request);
+                    username = user != null ? user.getUserName() : null;
 //                    if(username == null) response.sendRedirect("login");
                 %>
                 <% if (username != null) {
