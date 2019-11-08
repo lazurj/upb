@@ -21,6 +21,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Base64;
+import java.util.List;
 
 @WebServlet(name = "DecryptServlet")
 public class DecryptServlet extends HttpServlet {
@@ -32,11 +33,11 @@ public class DecryptServlet extends HttpServlet {
             return;
         }
 
-        if (request.getParameter("download") != null) {
+        if (request.getParameter("decrypt") != null) {
             String fileName = request.getParameter("fileToDecrypt");
             if("OfflineDec.jar".equals(fileName)) {
-                File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
-                request.setAttribute("files", files);
+                List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
+                request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
                 request.setAttribute("keymsg", "You can not decrypt this file.");
                 request.getRequestDispatcher("/files.jsp").forward(request, response);
             } else {
@@ -95,17 +96,29 @@ public class DecryptServlet extends HttpServlet {
                     }
                     in.close();
                     outFile.flush();
+                    decFile.delete();
                 }
             }
-        } else {
-            File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
-
-            request.setAttribute("files", files);
-            request.getRequestDispatcher("/files.jsp").forward(request, response);
-        }
-
-
-        if (request.getParameter("delete") != null) {
+        } else if (request.getParameter("download") != null) {
+            String fileName = request.getParameter("fileToDecrypt");
+            if (fileName != null && !fileName.isEmpty()) {
+                File file = new File(loggedUser.getDirectory() + File.separator + fileName);
+                response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+                OutputStream outFile = response.getOutputStream();
+                FileInputStream in = new FileInputStream(file);
+                byte[] buffer = new byte[4096];
+                int length;
+                while ((length = in.read(buffer)) > 0) {
+                    outFile.write(buffer, 0, length);
+                }
+                in.close();
+                outFile.flush();
+            } else {
+                List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
+                request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
+                request.getRequestDispatcher("/files.jsp").forward(request, response);
+            }
+        } else if (request.getParameter("delete") != null) {
             String fileName = request.getParameter("fileToDecrypt");
             if("OfflineDec.jar".equals(fileName)) {
                 File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
@@ -126,8 +139,7 @@ public class DecryptServlet extends HttpServlet {
                 request.getRequestDispatcher("/files.jsp").forward(request, response);
             }
 
-        }
-        if (request.getParameter("getHash") != null) {
+        } else if (request.getParameter("getHash") != null) {
             String fileName = request.getParameter("fileName");
             String fileNameSep = fileName.substring(0, 4);
             if("OfflineDec.jar".equals(fileName)) {
@@ -161,6 +173,10 @@ public class DecryptServlet extends HttpServlet {
                 in.close();
                 outFile.flush();
             }
+        } else {
+            List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
+            request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
+            request.getRequestDispatcher("/files.jsp").forward(request, response);
         }
     }
 
