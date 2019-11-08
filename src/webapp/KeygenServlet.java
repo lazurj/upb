@@ -1,5 +1,6 @@
 package webapp;
 
+import database.dto.User;
 import database.dto.Util.DtoUtils;
 import webapp.utils.AsyncCrypto;
 
@@ -11,8 +12,7 @@ import java.io.*;
 import java.security.NoSuchAlgorithmException;
 
 public class KeygenServlet extends HttpServlet {
-    String privateKey = null;
-    String publicKey = null;
+
 
 
     @Override
@@ -23,24 +23,6 @@ public class KeygenServlet extends HttpServlet {
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
-        if ("save".equals(request.getParameter("b"))) {
-        try {
-            AsyncCrypto asyncCrypto = new AsyncCrypto();
-            privateKey =asyncCrypto.PrivateKeyString();
-            publicKey = asyncCrypto.PublicKeyString();
-
-
-            request.setAttribute("privateKey", privateKey);
-            request.setAttribute("publicKey", publicKey);
-            request.getRequestDispatcher("/keygen.jsp").forward(request, response);
-
-
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-
-        }
-
 
         if ("download".equals(request.getParameter("b"))) {
             String privateKey = request.getParameter("privateKey");
@@ -85,20 +67,20 @@ public class KeygenServlet extends HttpServlet {
         }
 
         try {
-            AsyncCrypto asyncCrypto = new AsyncCrypto();
-            privateKey =asyncCrypto.PrivateKeyString();
-            publicKey = asyncCrypto.PublicKeyString();
+//            AsyncCrypto asyncCrypto = new AsyncCrypto();
+//            privateKey =asyncCrypto.PrivateKeyString();
+//            publicKey = asyncCrypto.PublicKeyString();
 
             //CryptoUtils.setpublicKey(publicKey,privateKey);
-
-
-
+            User user = DtoUtils.getLoggedUser(request);
+            String privateKey = user.getPrivateKey();
+            String publicKey = user.getPublicKey();
             request.setAttribute("privateKey", privateKey);
             request.setAttribute("publicKey", publicKey);
             request.getRequestDispatcher("/keygen.jsp").forward(request, response);
 
 
-        } catch (NoSuchAlgorithmException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
