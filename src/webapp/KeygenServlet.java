@@ -1,12 +1,12 @@
 package webapp;
 
+import database.dto.Util.DtoUtils;
 import webapp.utils.AsyncCrypto;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 
@@ -18,7 +18,11 @@ public class KeygenServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        if(DtoUtils.getLoggedUser(request) == null) {
+            response.sendRedirect("/login");
+            //request.getRequestDispatcher("/login.jsp").forward(request, response);
+            return;
+        }
         if ("save".equals(request.getParameter("b"))) {
         try {
             AsyncCrypto asyncCrypto = new AsyncCrypto();
@@ -74,11 +78,7 @@ public class KeygenServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        Long UserID = (Long)session.getAttribute("loggedUser");
-
-        if(UserID == null)
-        {
+        if(DtoUtils.getLoggedUser(request) == null) {
             response.sendRedirect("/login");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;

@@ -1,5 +1,6 @@
 package webapp;
 
+import database.dto.Util.DtoUtils;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
 
@@ -17,6 +18,12 @@ import java.util.Base64;
 @WebServlet(name = "DecryptServlet")
 public class DecryptServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
+        if(DtoUtils.getLoggedUser(request) == null) {
+            response.sendRedirect("/login");
+            //request.getRequestDispatcher("/login.jsp").forward(request, response);
+            return;
+        }
+
         if (request.getParameter("decrypt") != null) {
             String fileName = request.getParameter("fileToDecrypt");
             if("OfflineDec.jar".equals(fileName)) {

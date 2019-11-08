@@ -1,9 +1,12 @@
 package database.dto.Util;
 
+import database.Database;
 import database.dto.FileInfo;
 import database.dto.User;
 import database.dto.UserFileInfo;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -83,5 +86,14 @@ public class DtoUtils {
             result.add(userFile.getFileInfo().getFile());
         }
         return result;
+    }
+
+    public static User getLoggedUser(HttpServletRequest req) {
+        HttpSession session = req.getSession(false);
+        Long userId = (Long)session.getAttribute("loggedUser");
+        if(userId == null ) {
+            return null;
+        }
+        return Database.findUserById(userId);
     }
 }

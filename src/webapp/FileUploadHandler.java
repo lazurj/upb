@@ -54,27 +54,14 @@ public class FileUploadHandler extends HttpServlet {
                             publicKey = item.getString();
 
                         }
-
-
                        // item.write( new File(UPLOAD_DIRECTORY + File.separator + name));
-
-
-
-
                     //}
                 }
-
-
-
                 File encFile = new File (UPLOAD_DIRECTORY + File.separator +"enc_"+ fileName);
-
-
                 //generovanie symetrickeho kluca
                 String key = CryptoUtils.generateRandomKey(16);
                 String salt = CryptoUtils.generateRandomKey(18);
                 String fullKey = key + salt;
-
-
                 //zasifrovanie sym kluca verejnym klucom
                 AsyncCrypto asyncCrypto = new AsyncCrypto();
                 byte[] encKey = asyncCrypto.encrypt(fullKey,asyncCrypto.getPublicKey(publicKey));
@@ -82,13 +69,7 @@ public class FileUploadHandler extends HttpServlet {
 //                String encKeyValue = new String(encKey, "UTF-8");
 //                String encKeyValue = Base64.getDecoder().decode(encKey);
                // String encKeyValue = new String(encKey);
-
-
              //   encKeyValue =new String(encKey, StandardCharsets.UTF_8);
-
-
-
-
 
                 CryptoUtils.setKey(encFile.getName() ,encKeyValue);
                 //CryptoUtils.setSalt(key, salt);
