@@ -39,6 +39,7 @@ public class FileUploadHandler extends HttpServlet {
             return;
         }
         //process only if its multipart content
+
         if(ServletFileUpload.isMultipartContent(request)){
             File file = null;
             try {
@@ -49,6 +50,7 @@ public class FileUploadHandler extends HttpServlet {
                 String name;
                 String fileName = "";
                 String publicKey = "";
+                String params = "";
                 for(FileItem item : multiparts){
                   //  if(!item.isFormField()){
 
@@ -62,9 +64,11 @@ public class FileUploadHandler extends HttpServlet {
                             fileName = file.getName();
 
                         }
-                       // item.write( new File(UPLOAD_DIRECTORY + File.separator + name));
-                    //}
+                       if ("sharedUsers".equals(fieldName)){
+                           params = item.getString();
+                       }
                 }
+
                 File encFile = new File (loggedUser.getDirectory() + File.separator +"enc_"+ fileName);
                 //generovanie symetrickeho kluca
                 String key = CryptoUtils.generateRandomKey(16);

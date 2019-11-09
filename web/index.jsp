@@ -1,4 +1,4 @@
-<%--
+<%@ page import="database.Database" %><%--
   Created by IntelliJ IDEA.
   User: Rastik
   Date: 10/23/2019
@@ -39,7 +39,7 @@
                     <div class="field">
                         <div class="file has-name is-fullwidth">
                             <label id="file-label clear-bottom-radius" class="file-label">
-                                <input class="file-input" required type="file" name="publicKey"
+                                <input class="file-input" required type="file" name="file"
                                        onchange="fileUploadHandler(this);">
                                 <span class="file-cta clear-bottom-radius">
                                 <span class="file-icon">
@@ -65,12 +65,13 @@
                                     <%--Tu treba dat select zamestnancov a cez FOR ich ako option vypisovat--%>
                                     <%--Value - nastav ako ID pouzivatela--%>
                                     <%--Option - vypis meno (napr. nick/email)--%>
-                                    <option value="option1">User 1</option>
-                                    <option value="option2">User 2</option>
-                                    <option value="option3">User 3</option>
-                                    <option value="option4">User 4</option>
-                                    <option value="option5">User 5</option>
-                                    <option value="option6">User 6</option>
+
+                                    <%  User loggedUser = DtoUtils.getLoggedUser(request);
+                                        List<User> users = Database.findOtherUsers(loggedUser.getId());
+                                        if(users != null){
+                                        for (User u: users) {
+                                            String u1name = u.getUserName();%>
+                                        <option value = "<%u.getId();%>"><%=u.getUserName()%></option><% }}%>
                                 </select>
                             </div>
                         </div>

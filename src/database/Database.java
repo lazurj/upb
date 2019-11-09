@@ -24,7 +24,7 @@ public class Database {
         try {
             Class.forName("org.sqlite.JDBC");
             //TODO prepis si cestu
-            return DriverManager.getConnection("jdbc:sqlite:C:/Users/Jakub/Desktop/UPB/sample.db");
+            return DriverManager.getConnection("jdbc:sqlite:C:/Users/Rastik/Desktop/UPBsample.db");
             //return DriverManager.getConnection("jdbc:sqlite:C:/Users/Domin/OneDrive/Plocha/upb-master/sample.db");
 
         } catch (ClassNotFoundException e) {
@@ -281,6 +281,19 @@ public class Database {
             e.printStackTrace();
         }
         return id;
+    }
+
+    public static List<User> findOtherUsers(Long Id) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from user where id != ?");
+            ps.setLong(1, Id);
+            ResultSet rs = ps.executeQuery();
+            List<User> results = DtoUtils.convertToUser(rs);
+            return results;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }
