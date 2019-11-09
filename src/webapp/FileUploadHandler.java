@@ -12,6 +12,9 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -51,7 +54,9 @@ public class FileUploadHandler extends HttpServlet {
                 String name;
                 String fileName = "";
                 String publicKey = "";
-                List<Long> sharedUserIds = new ArrayList<>();
+
+                List<User> usersShare = new ArrayList<>();
+
                 for(FileItem item : multiparts){
                   //  if(!item.isFormField()){
 
@@ -66,40 +71,22 @@ public class FileUploadHandler extends HttpServlet {
 
                         }
                        if ("sharedUsers".equals(fieldName)){
-                           String userId = item.getString();
-                           if(userId != null && !userId.isEmpty()) {
-                               sharedUserIds.add(Long.valueOf(userId));
-                           }
+               item.getString();
+
+                           usersShare.add(Database.findUserById(Long.parseLong(item.getString())));
+
                        }
                 }
+                //sifrovanie log usera
+                AsyncCrypto.encUserFile(loggedUser,file,fileName);
+                //sifrovanie zdielanych
+                if (!usersShare.isEmpty()){
+                    for (User u: usersShare) {
+                        AsyncCrypto.encUserFile(u,file,fileName);
+                    }
+                }
 
-                File encFile = new File (loggedUser.getDirectory() + File.separator +"enc_"+ fileName);
-                //generovanie symetrickeho kluca
-                String key = CryptoUtils.generateRandomKey(16);
-                String salt = CryptoUtils.generateRandomKey(18);
-                String fullKey = key + salt;
-                //zasifrovanie sym kluca verejnym klucom
-                AsyncCrypto asyncCrypto = new AsyncCrypto();
-                UserKey userKey = Database.findMaxUserKeyByUserId(loggedUser.getId());
-                byte[] encKey = asyncCrypto.encrypt(fullKey,asyncCrypto.getPublicKey(userKey.getPublicKey()));
-                String encKeyValue = Base64.getEncoder().encodeToString(encKey);
-//                String encKeyValue = new String(encKey, "UTF-8");
-//                String encKeyValue = Base64.getDecoder().decode(encKey);
-               // String encKeyValue = new String(encKey);
-             //   encKeyValue =new String(encKey, StandardCharsets.UTF_8);
-
-                Database.insertFile(encFile.getName(), "mac");
-                FileInfo fileInfo = Database.findFileInfoByName(encFile.getName());
-                Database.insertUserFile(loggedUser.getId(), fileInfo.getId(),userKey.getId(),encKeyValue );
-                String content = new String(Files.readAllBytes(Paths.get(file.getPath())));
-
-               // String content1 = Base64.getEncoder().encodeToString(Files.readAllBytes(Paths.get(file.getPath())));
-                byte[] hashofFile = AsyncCrypto.hmacDigestBytes(content,"password",HMAC_SHA256);
-                CryptoUtils.encrypt(key, salt, file, encFile, hashofFile);
-
-                //String test1 = AsyncCrypto.hmacDigest("fooo","password",HMAC_SHA256);
-                //byte[] test2 = AsyncCrypto.getSHA("foo");
-                request.setAttribute("keymsg", encKeyValue);
+                request.setAttribute("keymsg", "test");
                 //File uploaded successfully
                 request.setAttribute("message", "File Uploaded Successfully");
             } catch (Exception ex) {
@@ -118,3 +105,6 @@ public class FileUploadHandler extends HttpServlet {
         request.getRequestDispatcher("/files.jsp").forward(request, response);
     }
 }
+
+
+

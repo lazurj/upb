@@ -296,4 +296,47 @@ public class Database {
         return null;
     }
 
+    public static void DeleteRowFromUserFile(Long id)
+    {
+        try
+        {
+            PreparedStatement ps = getConnection().prepareStatement("DELETE FROM user_file WHERE id = ?");
+            ps.setLong(1,id);
+            ps.executeUpdate();
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+
+    public static UserFileInfo findUserFileByUserIdandFile(Long userId,Long file_info_id) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from user_file where user_id= ? and file_info_id = ?");
+            ps.setLong(1, userId);
+            ps.setLong(2, file_info_id);
+            ResultSet rs = ps.executeQuery();
+            List<UserFileInfo> result = DtoUtils.convertToUserFileInfo(rs);
+
+            return result.get(0);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void DeleteRowFromFileInfo(Long id)
+    {
+        try
+        {
+            PreparedStatement ps = getConnection().prepareStatement("DELETE FROM file_info WHERE id = ?");
+            ps.setLong(1,id);
+            ps.executeUpdate();
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+
 }

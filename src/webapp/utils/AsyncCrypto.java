@@ -1,10 +1,18 @@
 package webapp.utils;
 
+import database.Database;
+import database.dto.FileInfo;
+import database.dto.User;
+import database.dto.UserKey;
+
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -221,6 +229,33 @@ public class AsyncCrypto {
         return hexString.toString();
     }
 
+    public static boolean encUserFile(User user, File file , String fileName){
+        try {
+            File encFile = new File (user.getDirectory() + File.separator +"enc_"+ fileName);
+            //generovanie symetrickeho kluca
+            String key = CryptoUtils.generateRandomKey(16);
+            String salt = CryptoUtils.generateRandomKey(18);
+            String fullKey = key + salt;
+            //zasifrovanie sym kluca verejnym klucom
+            AsyncCrypto asyncCrypto = new AsyncCrypto();
+            UserKey userKey = Database.findMaxUserKeyByUserId(user.getId());
+            byte[] encKey = asyncCrypto.encrypt(fullKey,asyncCrypto.getPublicKey(userKey.getPublicKey()));
+            String encKeyValue = Base64.getEncoder().encodeToString(encKey);
 
+            Database.insertFile(encFile.getName(), "mac");
+            FileInfo fileInfo = Database.findFileInfoByName(encFile.getName());
+            Database.insertUserFile(user.getId(), fileInfo.getId(),userKey.getId(),encKeyValue );
+            String content = new String(Files.readAllBytes(Paths.get(file.getPath())));
+
+            // String content1 = Base64.getEncoder().encodeToString(Files.readAllBytes(Paths.get(file.getPath())));
+            byte[] hashofFile = AsyncCrypto.hmacDigestBytes(content,"password",HMAC_SHA256);
+            CryptoUtils.encrypt(key, salt, file, encFile, hashofFile);
+        }
+        catch (Exception e){
+            return false;
+        }
+
+        return true;
+    }
 
 }

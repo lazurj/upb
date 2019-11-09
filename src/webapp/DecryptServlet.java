@@ -1,6 +1,7 @@
 package webapp;
 
 import database.Database;
+import database.dto.FileInfo;
 import database.dto.User;
 import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
@@ -121,21 +122,27 @@ public class DecryptServlet extends HttpServlet {
         } else if (request.getParameter("delete") != null) {
             String fileName = request.getParameter("fileToDecrypt");
             if("OfflineDec.jar".equals(fileName)) {
-                File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
+                File[] files = new File(loggedUser.getDirectory()).listFiles();
                 request.setAttribute("files", files);
                 request.setAttribute("keymsg", "You can not delete this file.");
                 request.getRequestDispatcher("/files.jsp").forward(request, response);
                 return;
             } else {
                 if (fileName != null && !fileName.isEmpty()) {
-                    File file = new File(FileUploadHandler.UPLOAD_DIRECTORY + File.separator + fileName);
+                    File file = new File(loggedUser.getDirectory() + File.separator + fileName);
 
                     file.delete();
+                    FileInfo fileInfo = Database.findFileInfoByName(fileName);
+                    Long fileId = fileInfo.getId();
+                    UserFileInfo userFileInfo = Database.findUserFileByUserIdandFile(loggedUser.getId(),fileId);
 
+                    Database.DeleteRowFromUserFile(userFileInfo.getId());
+                    Database.DeleteRowFromFileInfo(userFileInfo.getFileInfoId());
                 }
-                File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
+                File[] files = new File(loggedUser.getDirectory()).listFiles();
 
-                request.setAttribute("files", files);
+                List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
+                request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
                 request.getRequestDispatcher("/files.jsp").forward(request, response);
             }
 
