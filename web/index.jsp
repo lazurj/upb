@@ -71,7 +71,7 @@
                                         if(users != null){
                                         for (User u: users) {
                                             String u1name = u.getUserName();%>
-                                        <option value = "<%u.getId();%>"><%=u.getUserName()%></option><% }}%>
+                                        <option value = "<%=u.getId()%>"><%=u.getUserName()%></option><% }}%>
                                 </select>
                             </div>
                         </div>

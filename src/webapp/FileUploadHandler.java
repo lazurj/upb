@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class FileUploadHandler extends HttpServlet {
                 String name;
                 String fileName = "";
                 String publicKey = "";
-                String params = "";
+                List<Long> sharedUserIds = new ArrayList<>();
                 for(FileItem item : multiparts){
                   //  if(!item.isFormField()){
 
@@ -65,7 +66,10 @@ public class FileUploadHandler extends HttpServlet {
 
                         }
                        if ("sharedUsers".equals(fieldName)){
-                           params = item.getString();
+                           String userId = item.getString();
+                           if(userId != null && !userId.isEmpty()) {
+                               sharedUserIds.add(Long.valueOf(userId));
+                           }
                        }
                 }
 
