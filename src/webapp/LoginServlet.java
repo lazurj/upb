@@ -3,6 +3,7 @@ package webapp;
 import database.Database;
 import database.dto.User;
 import webapp.utils.AsyncCrypto;
+import webapp.utils.Validators;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
@@ -48,26 +49,12 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String isLogin = request.getParameter("login");
-        String isLogout = request.getParameter("logout");
         String isRegister = request.getParameter("register");
+        String isLogout = request.getParameter("logout");
 
         String username = request.getParameter("username");
+        String email = request.getParameter("email");
         String password = request.getParameter("password");
-
-
-        if (isRegister != null){
-            String password1 = request.getParameter("password2");
-            String email = request.getParameter("email");
-            if (!password.equals(password1) || Database.findUserByName(username) != null){
-                 response.sendRedirect("/login");
-            }
-            Long userId = Database.insertUser(username,password,email);
-            User newUser = Database.findUserById(userId);
-            Database.insertUserKey(userId);
-            File userDir = new File(newUser.getDirectory());
-            userDir.mkdir();
-        }
-
 
         if (isLogin != null) {
 //            if (testUser.equals(username) && testPass.equals(password)) {
@@ -83,13 +70,13 @@ public class LoginServlet extends HttpServlet {
 //            }
 
             User user = Database.findUserByName(username);
-            if (user != null){
-               String salt = user.getSalt();
+            if (user != null) {
+                String salt = user.getSalt();
 
-                byte[] hashPassword = AsyncCrypto.hmacDigestBytes(password,salt,HMAC_SHA256);
+                byte[] hashPassword = AsyncCrypto.hmacDigestBytes(password, salt, HMAC_SHA256);
                 String hashPassordString = Base64.getEncoder().encodeToString(hashPassword);
 
-                if (hashPassordString.equals(user.getPassword())){
+                if (hashPassordString.equals(user.getPassword())) {
                     request.setAttribute("loggedIn", true);
                     HttpSession session = request.getSession();
                     session.setMaxInactiveInterval(45 * 60); //Zivotnost - 45 minut
@@ -97,18 +84,54 @@ public class LoginServlet extends HttpServlet {
                     request.getRequestDispatcher("/login.jsp").forward(request, response);
                 }
             }
-            response.sendRedirect("/login");
+        } else if (isRegister != null) {
+            if (username != null && email != null && password != null) {
 
-        } else {
-            //response.sendRedirect("/login");
+                // email validation
+                String emailError = Validators.email(password);
+                if (emailError != null) {
+                    request.setAttribute("registerError", emailError);
+                } else
 
-        }
+                // password validation
+                try {
+                    String passError = Validators.password(password);
+                    if (passError == null) {
+                        // username validation
+                        if (Database.findUserByName(username) != null) {
+                            response.sendRedirect("/login");
+                            request.setAttribute("registerError", "Name <strong>" + username + "</strong> is already in use.");
+                            request.getRequestDispatcher("/login.jsp").forward(request, response);
+                            return;
+                        } else {
 
-        if (isLogout != null) {
+                        }
+                        Long userId = Database.insertUser(username, password, email);
+                        User newUser = Database.findUserById(userId);
+                        Database.insertUserKey(userId);
+                        File userDir = new File(newUser.getDirectory());
+                        userDir.mkdir();
+                    } else {
+                        request.setAttribute("registerError", passError);
+                        request.getRequestDispatcher("/login.jsp").forward(request, response);
+                        return;
+                    }
+                } catch (Exception e) {
+                    request.setAttribute("registerError", "General error");
+                    request.getRequestDispatcher("/login.jsp").forward(request, response);
+                    return;
+                    // e.printStackTrace();
+                }
+            } else {
+                request.setAttribute("registerError", "Missing values");
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
+                return;
+            }
+        } else if (isLogout != null) {
             HttpSession session = request.getSession(false);
             session.invalidate();
         }
-        //request.getRequestDispatcher("/login.jsp").forward(request, response);
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 
     private boolean isLogedIn(HttpServletRequest request) {

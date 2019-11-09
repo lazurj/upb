@@ -36,11 +36,12 @@
             <div class="box">
                 <h3 class="title">File upload:</h3>
                 <form style="text-align: center" action="upload" method="post" enctype="multipart/form-data">
-                    <div class="file has-name is-fullwidth">
-                        <label id="file-label clear-bottom-radius" class="file-label">
-                            <input class="file-input" required type="file" name="file"
-                                   onchange="fileUploadHandler(this);">
-                            <span class="file-cta clear-bottom-radius">
+                    <div class="field">
+                        <div class="file has-name is-fullwidth">
+                            <label id="file-label clear-bottom-radius" class="file-label">
+                                <input class="file-input" required type="file" name="publicKey"
+                                       onchange="fileUploadHandler(this);">
+                                <span class="file-cta clear-bottom-radius">
                                 <span class="file-icon">
                                 <i class="fas fa-upload"></i>
                                 </span>
@@ -48,12 +49,35 @@
                                 Choose a file…
                                 </span>
                             </span>
-                            <span id="file-name" class="file-name clear-bottom-radius"></span>
-                        </label>
+                                <span id="file-name" class="file-name clear-bottom-radius"></span>
+                            </label>
+                        </div>
                     </div>
-                    <textarea class="textarea clear-radius" placeholder="Enter your pulbic key to encrypy selected file..."
-                              name="publicKey"
-                              ></textarea>
+                    <%--                    <textarea class="textarea clear-radius" placeholder="Enter your pulbic key to encrypy selected file..."--%>
+                    <%--                              name="publicKey"--%>
+                    <%--                              required></textarea>--%>
+
+                    <div id="userSelect" class="field">
+                        <label class="label">Sharing file with others:</label>
+                        <div class="control is-expanded">
+                            <div class="select is-multiple is-fullwidth">
+                                <select name="sharedUsers" multiple size="4">
+                                    <%--Tu treba dat select zamestnancov a cez FOR ich ako option vypisovat--%>
+                                    <%--Value - nastav ako ID pouzivatela--%>
+                                    <%--Option - vypis meno (napr. nick/email)--%>
+                                    <option value="option1">User 1</option>
+                                    <option value="option2">User 2</option>
+                                    <option value="option3">User 3</option>
+                                    <option value="option4">User 4</option>
+                                    <option value="option5">User 5</option>
+                                    <option value="option6">User 6</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="help"><i>Hold Ctrl to select mutliple</i></p>
+                    </div>
+                    <%--Nastav hodnotu VALUE na id pouzivatela--%>
+                    <input type="hidden" name="user" value=""/>
                     <button class="button is-dark is-fullwidth clear-top-radius" value="upload">
                         <span class="icon is-small"><i class="fas fa-lock"></i></span>
                         <span>Upload file for encryption</span>

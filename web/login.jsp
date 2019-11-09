@@ -49,8 +49,10 @@
 <%
     Boolean loggedIn = (Boolean) request.getAttribute("loggedIn");
     Boolean loggedOut = (Boolean) request.getAttribute("loggedOut");
+    Boolean isRegister = request.getParameter("register") != null;
 
     Boolean badCredentials = (Boolean) request.getAttribute("badCredentials");
+    String registerError = (String) request.getAttribute("registerError");
 %>
 <section class="section">
     <div class="container">
@@ -62,8 +64,20 @@
 
                 <div class="tabs is-centered">
                     <ul>
+                        <%
+                            if (!isRegister) {
+                        %>
                         <li id="loginTab" class="is-active" style="width: 30%;"><a onclick="showLogin()">Login</a></li>
                         <li id="registerTab" style="width: 30%;"><a onclick="showRegister()">Register</a></li>
+                        <%
+                        } else {
+                        %>
+                        <li id="loginTab" style="width: 30%;"><a onclick="showLogin()">Login</a></li>
+                        <li id="registerTab" class="is-active" style="width: 30%;"><a
+                                onclick="showRegister()">Register</a></li>
+                        <%
+                            }
+                        %>
                     </ul>
                 </div>
                 <form id="loginForm" action="login" method="post" name="loginForm">
@@ -98,7 +112,7 @@
                         </div>
                         <div class="field-body">
                             <button class="button is-link is-fullwidth" type="submit" name="login"
-                                    value="delete">
+                                    value="login">
                                 <span class="icon is-small"><i class="fas fa-sign-in-alt"></i></span>
                                 <span>Sign-in</span>
                             </button>
@@ -106,7 +120,7 @@
                     </div>
 
                     <%
-                        if (badCredentials != null && badCredentials == true) {
+                        if (badCredentials != null && badCredentials) {
                     %>
                     <article class="message is-danger">
                         <div class="message-body">
@@ -118,7 +132,7 @@
                     %>
                 </form>
 
-                <form id="registerForm" style="display: none;" action="login" method="post" name="registerForm">
+                <form id="registerForm" action="login" method="post" name="registerForm">
                     <div class="field is-horizontal">
                         <div class="field-label is-normal">
                             <label class="label required">Username:</label>
@@ -137,6 +151,7 @@
                         <div class="field-body">
                             <div class="field">
                                 <input class="input" type="text" required
+                                       pattern="[^ @]*@[^ @]*"
                                        name="email"/>
                             </div>
                         </div>
@@ -148,22 +163,26 @@
                         <div class="field-body">
                             <div class="field">
                                 <input class="input" type="password" required
+                                       minlength="8"
+                                       pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
                                        name="password"/>
+                                <p class="help">Password must contain at least one letter and one number with minimum 8
+                                    characters.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="field is-horizontal">
-                        <div class="field-label is-normal">
-                            <label class="label required">Repeat password:</label>
-                        </div>
-                        <div class="field-body">
-                            <div class="field">
-                                <input class="input" type="password" required
-                                       name="password2"/>
-                            </div>
-                        </div>
-                    </div>
+                    <%--                    <div class="field is-horizontal">--%>
+                    <%--                        <div class="field-label is-normal">--%>
+                    <%--                            <label class="label required">Repeat password:</label>--%>
+                    <%--                        </div>--%>
+                    <%--                        <div class="field-body">--%>
+                    <%--                            <div class="field">--%>
+                    <%--                                <input class="input" type="password" required--%>
+                    <%--                                       name="password2"/>--%>
+                    <%--                            </div>--%>
+                    <%--                        </div>--%>
+                    <%--                    </div>--%>
 
                     <div class="field is-horizontal">
                         <div class="field-label is-normal">
@@ -177,6 +196,14 @@
                             </button>
                         </div>
                     </div>
+                    <% if (registerError != null) {
+                    %>
+                    <article class="message is-danger">
+                        <div class="message-body">
+                            <%=registerError%>
+                        </div>
+                    </article>
+                    <% } %>
                 </form>
 
             </div>
@@ -239,6 +266,12 @@
         console.log(toasts[i]);
         setToastDisappear(toasts[i]);
     }
+
+    <% if (!isRegister) {  %>
+    showLogin();
+    <% } else { %>
+    showRegister();
+    <% } %>
 </script>
 
 </html>

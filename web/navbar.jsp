@@ -36,16 +36,16 @@
     <div id="navbarMenu" class="navbar-menu">
         <div class="navbar-start">
             <a href="/" class="navbar-item">
-                Home
+                Upload
             </a>
 
             <%--            <a class="navbar-item"><button form="showFileForm" class="button is-text" type="submit" name="b1" value="showfiles">Show files</button></a>--%>
             <a href="files" class="navbar-item">
-                File
+                My files
             </a>
             <%--            <button form="showFileForm" class="navbar-item" type="submit" name="b1" value="showfiles">Show files</button>--%>
             <a href="keygen" class="navbar-item">
-                Key generator
+                My keys
             </a>
         </div>
         <div class="navbar-end">
