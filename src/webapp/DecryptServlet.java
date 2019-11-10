@@ -6,6 +6,7 @@ import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
+import webapp.utils.SuborUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -65,7 +66,7 @@ public class DecryptServlet extends HttpServlet {
                                 if (keySalt != null) {
                                     fileName = fileName.substring(4, fileName.length());
                                     decFile = new File(loggedUser.getDirectory() + File.separator + "dec_" + fileName);
-                                    if (CryptoUtils.decrypt(keySalt.substring(0, 16), keySalt.substring(16, 34), fileInfo.getFileInfo().getFile(loggedUser.getUserName()), decFile)) {
+                                    if (CryptoUtils.decrypt(pk, fileInfo.getFileInfo().getFile(loggedUser.getUserName()), decFile)) {
                                         request.setAttribute("keymsg", "Done. Integrity check OK.");
                                     } else {
                                         request.setAttribute("keymsg", "Your file was modified.");
@@ -103,13 +104,14 @@ public class DecryptServlet extends HttpServlet {
             String fileName = request.getParameter("fileToDecrypt");
             if (fileName != null && !fileName.isEmpty()) {
                 File file = new File(loggedUser.getDirectory() + File.separator + fileName);
-                
+
                 /* hash to header */
+                /*
                 boolean test = true;
                 if (test)
                 {
                 	SuborUtils.addStuff(file, file);
-                }
+                }*/
                 
                 /* hash to header - end */
                 

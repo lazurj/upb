@@ -247,7 +247,7 @@ public class AsyncCrypto {
 
             // String content1 = Base64.getEncoder().encodeToString(Files.readAllBytes(Paths.get(file.getPath())));
             byte[] hashofFile = AsyncCrypto.hmacDigestBytes(content,"password",HMAC_SHA256);
-            CryptoUtils.encrypt(key, salt, file, encFile, hashofFile);
+            CryptoUtils.encrypt(key, salt, file, encFile, hashofFile,encKey);
         }
         catch (Exception e){
             return false;

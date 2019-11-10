@@ -1,5 +1,8 @@
 package webapp.utils;
 
+import database.Database;
+import database.dto.UserFileInfo;
+import database.dto.Util.DtoUtils;
 import org.apache.commons.io.FileUtils;
 
 import javax.crypto.*;
@@ -12,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -27,7 +31,7 @@ public class CryptoUtils
 	private static Properties privateKeyProp = null;
 	private static Properties publicKeyProp = null;
 
-	public static boolean encrypt(String key, String salt, File inputFile, File outputFile, byte[] hashofFile) throws Exception {
+	public static boolean encrypt(String key, String salt, File inputFile, File outputFile, byte[] hashofFile, byte[] encKey) throws Exception {
 
 
 		boolean pass = false;
@@ -41,11 +45,13 @@ public class CryptoUtils
 
 		byte [] foo = Files.readAllBytes(Paths.get(outputFile.getPath()));
 		int one = 1;
-		ByteBuffer buf = ByteBuffer.allocateDirect(foo.length+hashofFile.length+4);
+		ByteBuffer buf = ByteBuffer.allocateDirect(foo.length+hashofFile.length+4+encKey.length+4);
 		int hashofFileLength = hashofFile.length;
 		buf.putInt(hashofFile.length);
 
 		buf.put(hashofFile);
+		buf.putInt(encKey.length);
+		buf.put(encKey);
 		buf.put(foo);
 
 
@@ -58,7 +64,7 @@ public class CryptoUtils
 		return true;
 	}
 	
-	public static boolean decrypt(String key, String salt, File inputFile, File outputFile) throws Exception {
+	public static boolean decrypt(PrivateKey pk,File inputFile, File outputFile) throws Exception {
 
 		File fooFile = new File (inputFile.getName());
 		FileUtils.copyFile(inputFile,fooFile);
@@ -74,6 +80,10 @@ public class CryptoUtils
 			byte[] hash1 =  new byte[hashlength];
 			buf.get(hash1);
 
+			int hashkeylength = buf.getInt();
+			byte[] hashkey =  new byte[hashkeylength];
+			buf.get(hashkey);
+
 			byte[] data = new byte[buf.remaining()];
 			buf.get(data);
 
@@ -86,6 +96,15 @@ public class CryptoUtils
 			wChannel.write(bufContent);
 
 			wChannel.close();
+
+
+
+
+			AsyncCrypto ac = null;
+			String keySalt = ac.decrypt(hashkey, pk);
+			String key = keySalt.substring(0, 16);
+			String salt =  keySalt.substring(16, 34);
+
 
 			if (doCrypto(Cipher.DECRYPT_MODE, key, salt, fooFile, outputFile)){
 				String content = new String(Files.readAllBytes(Paths.get(outputFile.getPath())));

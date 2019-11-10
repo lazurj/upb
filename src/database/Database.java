@@ -20,7 +20,7 @@ import static webapp.utils.AsyncCrypto.HMAC_SHA256;
  */
 public class Database {
 
-    private static synchronized Connection getConnection () {
+    public static synchronized Connection getConnection () {
         try {
             Class.forName("org.sqlite.JDBC");
             //TODO prepis si cestu
