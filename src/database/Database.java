@@ -169,13 +169,12 @@ public class Database {
         return null;
     }
 
-    public static FileInfo findFileInfoByName(String fileName) {
+    public static List<FileInfo> findFileInfoByName(String fileName) {
         try {
             PreparedStatement ps = getConnection().prepareStatement("select * from file_info where file_name = ?");
             ps.setString(1, fileName);
             ResultSet rs = ps.executeQuery();
-            List<FileInfo> files = DtoUtils.convertToFileInfo(rs);
-            return !files.isEmpty() ? files.get(0) : null;
+            return DtoUtils.convertToFileInfo(rs);
         } catch (SQLException e) {
             e.printStackTrace();
         }

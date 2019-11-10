@@ -1,7 +1,6 @@
 package webapp.utils;
 
 import database.Database;
-import database.dto.FileInfo;
 import database.dto.User;
 import database.dto.UserKey;
 
@@ -242,9 +241,8 @@ public class AsyncCrypto {
             byte[] encKey = asyncCrypto.encrypt(fullKey,asyncCrypto.getPublicKey(userKey.getPublicKey()));
             String encKeyValue = Base64.getEncoder().encodeToString(encKey);
 
-            Database.insertFile(encFile.getName(), "mac");
-            FileInfo fileInfo = Database.findFileInfoByName(encFile.getName());
-            Database.insertUserFile(user.getId(), fileInfo.getId(),userKey.getId(),encKeyValue );
+            Long fileId = Database.insertFile(encFile.getName(), "mac");
+            Database.insertUserFile(user.getId(), fileId,userKey.getId(),encKeyValue);
             String content = new String(Files.readAllBytes(Paths.get(file.getPath())));
 
             // String content1 = Base64.getEncoder().encodeToString(Files.readAllBytes(Paths.get(file.getPath())));

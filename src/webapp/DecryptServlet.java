@@ -1,7 +1,6 @@
 package webapp;
 
 import database.Database;
-import database.dto.FileInfo;
 import database.dto.User;
 import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
@@ -129,12 +128,10 @@ public class DecryptServlet extends HttpServlet {
                 return;
             } else {
                 if (fileName != null && !fileName.isEmpty()) {
-                    FileInfo fileInfo = Database.findFileInfoByName(fileName);
-                    Long fileId = fileInfo.getId();
-                    UserFileInfo userFileInfo = Database.findUserFileByUserIdandFile(loggedUser.getId(),fileId);
+                    UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), fileName);
                     Database.DeleteRowFromUserFile(userFileInfo.getId());
                     Database.DeleteRowFromFileInfo(userFileInfo.getFileInfoId());
-                    fileInfo.getFile(loggedUser.getUserName()).delete();
+                    userFileInfo.getFileInfo().getFile(loggedUser.getUserName()).delete();
                 }
                 List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
                 request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
