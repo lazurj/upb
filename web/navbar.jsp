@@ -35,7 +35,7 @@
     </div>
     <div id="navbarMenu" class="navbar-menu">
         <div class="navbar-start">
-            <a href="index.jsp" class="navbar-item">
+            <a href="upload" class="navbar-item">
                 Upload
             </a>
 
@@ -46,6 +46,9 @@
             <%--            <button form="showFileForm" class="navbar-item" type="submit" name="b1" value="showfiles">Show files</button>--%>
             <a href="keygen" class="navbar-item">
                 My keys
+            </a>
+            <a href="offlineDec" class="navbar-item">
+                Download decryption tool
             </a>
         </div>
         <div class="navbar-end">

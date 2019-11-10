@@ -27,6 +27,14 @@
         <servlet-name>FileUploadHandler</servlet-name>
         <url-pattern>/upload</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>OfflineDecServlet</servlet-name>
+        <servlet-class>webapp.OfflineDecServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OfflineDecServlet</servlet-name>
+        <url-pattern>/offlineDec</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>DecryptServlet</servlet-name>

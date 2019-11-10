@@ -20,7 +20,7 @@ public class KeygenServlet extends HttpServlet {
             throws ServletException, IOException {
         User loggedUser = DtoUtils.getLoggedUser(request);
         if(loggedUser == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect("./");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
@@ -77,7 +77,7 @@ public class KeygenServlet extends HttpServlet {
             throws ServletException, IOException {
         User user = DtoUtils.getLoggedUser(request);
         if(user == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect("./");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }

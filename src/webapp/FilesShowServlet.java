@@ -18,7 +18,7 @@ public class FilesShowServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User loggedUser = DtoUtils.getLoggedUser(request);
         if(loggedUser  == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect("./");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
@@ -31,7 +31,7 @@ public class FilesShowServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User loggedUser = DtoUtils.getLoggedUser(request);
         if(loggedUser  == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect("./");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }

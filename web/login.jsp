@@ -1,4 +1,4 @@
-<%--
+<%@ page import="database.Database" %><%--
   Created by IntelliJ IDEA.
   User: kalan
   Date: 31. 10. 2019
@@ -47,6 +47,7 @@
 <%@include file="navbar.jsp" %>
 
 <%
+    Database.createNewDatabase("upb.db");
     Boolean loggedIn = (Boolean) request.getAttribute("loggedIn");
     Boolean loggedOut = (Boolean) request.getAttribute("loggedOut");
     Boolean registerComplete = (Boolean) request.getAttribute("registerComplete");

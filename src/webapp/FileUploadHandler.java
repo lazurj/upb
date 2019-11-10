@@ -27,7 +27,7 @@ public class FileUploadHandler extends HttpServlet {
 
         User loggedUser = DtoUtils.getLoggedUser(request);
         if(loggedUser  == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect("./");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
@@ -86,6 +86,17 @@ public class FileUploadHandler extends HttpServlet {
         List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser .getId());
         request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
         request.getRequestDispatcher("/files.jsp").forward(request, response);
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        User loggedUser = DtoUtils.getLoggedUser(request);
+        if(loggedUser  == null) {
+            response.sendRedirect("./");
+            //request.getRequestDispatcher("/login.jsp").forward(request, response);
+            return;
+        }
+        request.getRequestDispatcher("/index.jsp").forward(request, response);
+
     }
 }
 

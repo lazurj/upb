@@ -6,7 +6,6 @@ import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
-import webapp.utils.SuborUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -29,7 +28,7 @@ public class DecryptServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
         User loggedUser = DtoUtils.getLoggedUser(request);
         if(loggedUser == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect("./");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
@@ -197,7 +196,7 @@ public class DecryptServlet extends HttpServlet {
 
         if(UserID == null)
         {
-            response.sendRedirect("/login");
+            response.sendRedirect("./");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }

@@ -22,7 +22,6 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         String isLogout = request.getParameter("logout");
 
-        Database.createNewDatabase("upb.db");
         if (isLogout != null) {
             request.setAttribute("loggedOut", true);
             HttpSession session = request.getSession(false);
@@ -123,29 +122,4 @@ public class LoginServlet extends HttpServlet {
         }
         request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
-
-    private boolean isLogedIn(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("username")) {
-                    return true;
-                }
-            }
-        }
-        return false;
-
-        /*
-        HttpSession session = request.getSession(false);
-        Long UserID = (Long)session.getAttribute("loggedUser");
-
-        if(UserID == null)
-            return false;
-        else
-            return true;
-
-         return true;
-         */
-    }
-
 }
