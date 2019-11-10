@@ -24,21 +24,9 @@ public class LoginServlet extends HttpServlet {
 
         Database.createNewDatabase("upb.db");
         if (isLogout != null) {
-            Cookie[] cookies = request.getCookies();
-            Cookie loginCookie = null;
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals("username")) {
-                        loginCookie = cookie;
-                        break;
-                    }
-                }
-            }
-            if (loginCookie != null) {
-                loginCookie.setMaxAge(0);
-                response.addCookie(loginCookie);
-                request.setAttribute("loggedOut", true);
-            }
+            request.setAttribute("loggedOut", true);
+            HttpSession session = request.getSession(false);
+            session.invalidate();
         }
 
         request.getRequestDispatcher("/login.jsp").forward(request, response);
@@ -99,7 +87,6 @@ public class LoginServlet extends HttpServlet {
                     if (passError == null) {
                         // username validation
                         if (Database.findUserByName(username) != null) {
-                            response.sendRedirect("/login");
                             request.setAttribute("registerError", "Name <strong>" + username + "</strong> is already in use.");
                             request.getRequestDispatcher("/login.jsp").forward(request, response);
                             return;
@@ -111,6 +98,9 @@ public class LoginServlet extends HttpServlet {
                         Database.insertUserKey(userId);
                         File userDir = new File(newUser.getDirectory());
                         userDir.mkdir();
+                        request.setAttribute("registerComplete", true);
+                        request.getRequestDispatcher("/login.jsp").forward(request, response);
+                        return;
                     } else {
                         request.setAttribute("registerError", passError);
                         request.getRequestDispatcher("/login.jsp").forward(request, response);

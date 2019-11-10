@@ -49,7 +49,8 @@
 <%
     Boolean loggedIn = (Boolean) request.getAttribute("loggedIn");
     Boolean loggedOut = (Boolean) request.getAttribute("loggedOut");
-    Boolean isRegister = request.getParameter("register") != null;
+    Boolean registerComplete = (Boolean) request.getAttribute("registerComplete");
+    Boolean isRegister = !Boolean.TRUE.equals(registerComplete) && request.getParameter("register") != null;
 
     Boolean badCredentials = (Boolean) request.getAttribute("badCredentials");
     String registerError = (String) request.getAttribute("registerError");
@@ -228,7 +229,7 @@
 </section>
 
 <%
-    if (loggedOut != null && loggedOut == true) {
+    if (Boolean.TRUE.equals(loggedOut)) {
 %>
 <div class="message is-success toast">
     <div class="message-header">
@@ -237,6 +238,22 @@
     </div>
     <div class="message-body">
         You were successfully logged out.
+    </div>
+</div>
+<%
+    }
+%>
+
+<%
+    if (Boolean.TRUE.equals(registerComplete)) {
+%>
+<div class="message is-success toast">
+    <div class="message-header">
+        <p>Registration completed</p>
+        <button class="delete" aria-label="delete"></button>
+    </div>
+    <div class="message-body">
+        You were successfully registered.
     </div>
 </div>
 <%

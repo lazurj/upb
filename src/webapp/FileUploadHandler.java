@@ -1,33 +1,22 @@
 package webapp;
 
 import database.Database;
-import database.dto.FileInfo;
 import database.dto.User;
 import database.dto.UserFileInfo;
-import database.dto.UserKey;
 import database.dto.Util.DtoUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import webapp.utils.AsyncCrypto;
-import webapp.utils.CryptoUtils;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-
-import static webapp.utils.AsyncCrypto.HMAC_SHA256;
 
 public class FileUploadHandler extends HttpServlet {
     public static String UPLOAD_DIRECTORY = "files";
@@ -59,22 +48,16 @@ public class FileUploadHandler extends HttpServlet {
 
                 for(FileItem item : multiparts){
                   //  if(!item.isFormField()){
-
                         String fieldName = item.getFieldName();
-
                         if ("file".equals(fieldName)){
-
                             name = item.getName();
                             file = new File(loggedUser.getDirectory() +File.separator + name);
                             item.write(file);
                             fileName = file.getName();
-
                         }
                        if ("sharedUsers".equals(fieldName)){
-               item.getString();
-
+                            item.getString();
                            usersShare.add(Database.findUserById(Long.parseLong(item.getString())));
-
                        }
                 }
                 //sifrovanie log usera

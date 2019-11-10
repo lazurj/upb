@@ -123,24 +123,19 @@ public class DecryptServlet extends HttpServlet {
             String fileName = request.getParameter("fileToDecrypt");
             if("OfflineDec.jar".equals(fileName)) {
                 File[] files = new File(loggedUser.getDirectory()).listFiles();
-                request.setAttribute("files", files);
-                request.setAttribute("keymsg", "You can not delete this file.");
+                List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
+                request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
                 request.getRequestDispatcher("/files.jsp").forward(request, response);
                 return;
             } else {
                 if (fileName != null && !fileName.isEmpty()) {
-                    File file = new File(loggedUser.getDirectory() + File.separator + fileName);
-
-                    file.delete();
                     FileInfo fileInfo = Database.findFileInfoByName(fileName);
                     Long fileId = fileInfo.getId();
                     UserFileInfo userFileInfo = Database.findUserFileByUserIdandFile(loggedUser.getId(),fileId);
-
                     Database.DeleteRowFromUserFile(userFileInfo.getId());
                     Database.DeleteRowFromFileInfo(userFileInfo.getFileInfoId());
+                    fileInfo.getFile(loggedUser.getUserName()).delete();
                 }
-                File[] files = new File(loggedUser.getDirectory()).listFiles();
-
                 List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
                 request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
                 request.getRequestDispatcher("/files.jsp").forward(request, response);
