@@ -74,7 +74,7 @@
                     </button>
                 </footer>
             </div>
-            <a class="button is-link is-fullwidth" href="./">Return</a>
+            <a class="button is-link is-fullwidth" href="./upload">Return</a>
         </section>
     </div>
 </section>

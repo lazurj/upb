@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class FileUploadHandler extends HttpServlet {
@@ -43,6 +44,7 @@ public class FileUploadHandler extends HttpServlet {
                 String name;
                 String fileName = "";
                 String publicKey = "";
+                String originalName = "";
 
                 List<User> usersShare = new ArrayList<>();
 
@@ -50,7 +52,9 @@ public class FileUploadHandler extends HttpServlet {
                   //  if(!item.isFormField()){
                         String fieldName = item.getFieldName();
                         if ("file".equals(fieldName)){
-                            name = item.getName();
+                            originalName = item.getName();
+                            UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), "enc_" +item.getName());
+                            name = userFileInfo != null ? new Date().getTime() + "_" +item.getName() : item.getName();
                             file = new File(loggedUser.getDirectory() +File.separator + name);
                             item.write(file);
                             fileName = file.getName();
@@ -65,7 +69,9 @@ public class FileUploadHandler extends HttpServlet {
                 //sifrovanie zdielanych
                 if (!usersShare.isEmpty()){
                     for (User u: usersShare) {
-                        AsyncCrypto.encUserFile(u,file,fileName);
+                        UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(u.getId()), "enc_" +originalName);
+                        String uniqueFileName = userFileInfo != null ? new Date().getTime() + "_" +originalName : originalName;
+                        AsyncCrypto.encUserFile(u,file,uniqueFileName);
                     }
                 }
 

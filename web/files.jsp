@@ -119,7 +119,7 @@
                     </div>
                 </form>
             </div>
-            <a class="button is-link is-fullwidth" class="link" href="./">Return</a>
+            <a class="button is-link is-fullwidth" class="link" href="./upload">Return</a>
         </section>
 
     </div>

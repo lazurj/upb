@@ -24,7 +24,7 @@ public class Database {
         try {
             Class.forName("org.sqlite.JDBC");
             //TODO prepis si cestu
-            return DriverManager.getConnection("jdbc:sqlite:user.db");
+            return DriverManager.getConnection("jdbc:sqlite:webApp3.db");
             //return DriverManager.getConnection("jdbc:sqlite:C:/Users/Domin/OneDrive/Plocha/upb-master/sample.db");
 
         } catch (ClassNotFoundException e) {
