@@ -35,7 +35,7 @@
     </div>
     <div id="navbarMenu" class="navbar-menu">
         <div class="navbar-start">
-            <a href="/" class="navbar-item">
+            <a href="index.jsp" class="navbar-item">
                 Upload
             </a>
 
