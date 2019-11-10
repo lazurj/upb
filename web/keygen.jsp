@@ -58,13 +58,13 @@
                     </div>
                 </div>
                 <footer class="card-footer">
-                    <%--<button form="submitForm" class="card-footer-item button" name="b"--%>
-                            <%--type="submit" value="save">--%>
-                    <%--<span class="icon">--%>
-                        <%--<i class="far fa-save"></i>--%>
-                    <%--</span>--%>
-                        <%--<span>Save</span>--%>
-                    <%--</button>--%>
+                    <button form="submitForm" class="card-footer-item button" name="b"
+                           type="submit" value="generate">
+                    <span class="icon">
+                        <i class="fa fa-refresh"></i>
+                    </span>
+                        <span>Generate new key</span>
+                    </button>
                     <button form="submitForm" class="card-footer-item button" name="b"
                             type="submit" value="download">
                     <span class="icon">

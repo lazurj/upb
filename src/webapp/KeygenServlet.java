@@ -18,7 +18,8 @@ public class KeygenServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if(DtoUtils.getLoggedUser(request) == null) {
+        User loggedUser = DtoUtils.getLoggedUser(request);
+        if(loggedUser == null) {
             response.sendRedirect("/login");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
@@ -50,6 +51,20 @@ public class KeygenServlet extends HttpServlet {
             }
             in.close();
             outFile.flush();
+        }
+        if ("generate".equals(request.getParameter("b"))) {
+            Database.insertUserKey(loggedUser.getId());
+            try {
+                UserKey key = Database.findMaxUserKeyByUserId(loggedUser.getId());
+                request.setAttribute("privateKey", key.getPrivateKey());
+                request.setAttribute("publicKey", key.getPublicKey());
+                request.getRequestDispatcher("/keygen.jsp").forward(request, response);
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            request.getRequestDispatcher("/keygen.jsp").forward(request, response);
         }
 
 
