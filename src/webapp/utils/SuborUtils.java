@@ -34,11 +34,13 @@ public class SuborUtils {
 			return "123";
 	
 	    try {
-	    	PreparedStatement ps = Database.getConnection().prepareStatement("select hash_key from file_info inner join "
-	    			+ "user_file on file_info.id == user_file.file_info_id where file_name = ?");
-	    	ps.setString(1, filename);
+	    	 PreparedStatement ps = Database.getConnection().prepareStatement("select hash_key from file_info inner join "
+	    			+ "user_file on file_info.id == user_file.file_info_id where file_name ='" + filename + "'");
+	    			
+	    	//PreparedStatement ps = Database.getConnection().prepareStatement("select hash_key from user_file");
+	    	System.out.println("Nazov suboru je: " + filename);
 	    	ResultSet rs = ps.executeQuery();
-	            hash = rs.getString(0);
+	            hash = rs.getString("hash_key");
 	        } catch (SQLException e) {
 	            e.printStackTrace();
 	        }
