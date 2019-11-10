@@ -1,5 +1,7 @@
 package webapp.utils;
 
+import org.apache.commons.io.FileUtils;
+
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -58,9 +60,12 @@ public class CryptoUtils
 	
 	public static boolean decrypt(String key, String salt, File inputFile, File outputFile) throws Exception {
 
+		File fooFile = new File (inputFile.getName());
+		FileUtils.copyFile(inputFile,fooFile);
 
 
-		byte [] foo = Files.readAllBytes(Paths.get(inputFile.getPath()));
+		byte [] foo1 = Files.readAllBytes(Paths.get(fooFile.getPath()));
+		byte [] foo = foo1.clone();
 
 		try {
 			//ByteBuffer buf = ByteBuffer.allocateDirect(foo.length);
@@ -76,24 +81,24 @@ public class CryptoUtils
 			bufContent.put(data);
 			//System.out.println(buf);
 
-			FileChannel wChannel = new FileOutputStream(inputFile, false).getChannel();
+			FileChannel wChannel = new FileOutputStream(fooFile, false).getChannel();
 			bufContent.flip();
 			wChannel.write(bufContent);
 
 			wChannel.close();
 
-			if (doCrypto(Cipher.DECRYPT_MODE, key, salt, inputFile, outputFile)){
+			if (doCrypto(Cipher.DECRYPT_MODE, key, salt, fooFile, outputFile)){
 				String content = new String(Files.readAllBytes(Paths.get(outputFile.getPath())));
 				byte[] hashofFile = AsyncCrypto.hmacDigestBytes(content,"password",HMAC_SHA256);
 				boolean retval = Arrays.equals(hashofFile, hash1);
 				if (retval){
 
-
+					fooFile.delete();
 					return true;
 				}
 
 			}
-
+			fooFile.delete();
 			return false;
 
 		}
@@ -226,6 +231,19 @@ public class CryptoUtils
 		OutputStream output = new FileOutputStream(CryptoUtils.class.getResource("public_private.properties").getPath());
 		privateKeyProp.store(output,null);
 
+	}
+
+	private void copyFileUsingChannel(File src, File dest) throws IOException {
+		FileChannel sourceChannel = null;
+		FileChannel destinationChannel = null;
+		try {
+			sourceChannel = new FileInputStream(src).getChannel();
+			destinationChannel = new FileOutputStream(dest).getChannel();
+			destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
+		} finally {
+			sourceChannel.close();
+			destinationChannel.close();
+		}
 	}
 
 
