@@ -103,6 +103,16 @@ public class DecryptServlet extends HttpServlet {
             String fileName = request.getParameter("fileToDecrypt");
             if (fileName != null && !fileName.isEmpty()) {
                 File file = new File(loggedUser.getDirectory() + File.separator + fileName);
+                
+                /* hash to header */
+                boolean test = true;
+                if (test)
+                {
+                	SuborUtils.addStuff(file, file);
+                }
+                
+                /* hash to header - end */
+                
                 response.setHeader("Content-disposition", "attachment; filename=" + fileName);
                 OutputStream outFile = response.getOutputStream();
                 FileInputStream in = new FileInputStream(file);
