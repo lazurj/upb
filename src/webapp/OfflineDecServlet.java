@@ -1,8 +1,6 @@
 package webapp;
 
-import database.Database;
 import database.dto.User;
-import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
 
 import javax.servlet.ServletException;
@@ -13,7 +11,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 
 public class OfflineDecServlet extends HttpServlet {
 
@@ -27,7 +24,7 @@ public class OfflineDecServlet extends HttpServlet {
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
-        File offlineDecFile = new File("/home/xbruce/zadanie3/files/OfflineDec.jar");
+        File offlineDecFile = new File("/home/xbruce/zadanie3/files/OfflineDec.zip");
         response.setHeader("Content-disposition", "attachment; filename=" + offlineDecFile.getName());
         OutputStream outFile = response.getOutputStream();
         FileInputStream in = new FileInputStream(offlineDecFile);
@@ -38,10 +35,6 @@ public class OfflineDecServlet extends HttpServlet {
         }
         in.close();
         outFile.flush();
-
-        List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser .getId());
-        request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
-        request.getRequestDispatcher("/files.jsp").forward(request, response);
     }
 
 }

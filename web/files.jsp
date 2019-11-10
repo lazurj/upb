@@ -51,8 +51,6 @@
                     </td>
                     <td><%="<button class=\"button\" onclick=\"document.getElementById('fileToDecrypt').value='" + file.getName() + "'\">Select<//button>"%>
                     </td>
-                    <td><%="<form style=\"margin-block-end: 0;\" action=\"decrypt\" method=\"post\"><input type=\"hidden\" name=\"fileName\" value=\'" + file.getName() + "'><button class=\"button\" name= \"getHash\" type=\"submit\">Download hashkey<//button></form>"%>
-                    </td>
 
                     <%
                         }

@@ -223,7 +223,7 @@
             </div>
         </div>
 
-        <a class="button is-link is-fullwidth" href="/index.jsp">Continue</a>
+        <a class="button is-link is-fullwidth" href="upload">Continue</a>
         <%
             }
         %>
