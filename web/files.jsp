@@ -81,16 +81,10 @@
 
                     <div class="field is-horizontal">
                         <div class="field-label is-normal">
-                            <label class="label is-normal">Decryption:</label>
+                            <label class="label is-normal"></label>
                         </div>
                         <div class="field-body">
                             <div class="field">
-                                <div class="control">
-                                    <%--            <input type="text" name="key"/>--%>
-                                    <textarea class="textarea clear-bottom-radius" style="height: 80px;"
-                                              placeholder="Enter your private key to decrypy selected file..."
-                                              name="key"></textarea>
-                                </div>
                                 <button class="button is-dark is-fullwidth clear-top-radius" type="submit" name="decrypt"
                                         value="Decrypt">
                                     <span class="icon is-small"><i class="fas fa-unlock-alt"></i></span>

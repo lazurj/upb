@@ -94,7 +94,6 @@
                 <button class="button is-link is-fullwidth" type="submit" name="b1" value="showfiles">Show files
                 </button>
             </form>
-            <a class="button is-link is-fullwidth" href="keygen">Generate me random private/public key pair</a>
         </section>
     </div>
 </section>
