@@ -69,7 +69,15 @@ public class LoginServlet extends HttpServlet {
                     session.setMaxInactiveInterval(45 * 60); //Zivotnost - 45 minut
                     session.setAttribute("loggedUser", user.getId());
                     request.getRequestDispatcher("/login.jsp").forward(request, response);
+                } else {
+                    request.setAttribute("loginError", "Incorrect username or password");
+                    request.getRequestDispatcher("/login.jsp").forward(request, response);
+                    return;
                 }
+            } else {
+                request.setAttribute("loginError", "Incorrect username or password");
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
+                return;
             }
         } else if (isRegister != null) {
             if (username != null && email != null && password != null) {

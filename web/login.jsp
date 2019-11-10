@@ -55,6 +55,7 @@
 
     Boolean badCredentials = (Boolean) request.getAttribute("badCredentials");
     String registerError = (String) request.getAttribute("registerError");
+    String loginError = (String) request.getAttribute("loginError");
 %>
 <section class="section">
     <div class="container">
@@ -255,6 +256,22 @@
     </div>
     <div class="message-body">
         You were successfully registered.
+    </div>
+</div>
+<%
+    }
+%>
+
+<%
+    if (loginError != null && !loginError.isEmpty()) {
+%>
+<div class="message is-danger toast">
+    <div class="message-header">
+        <p>Login failure</p>
+        <button class="delete" aria-label="delete"></button>
+    </div>
+    <div class="message-body">
+            <%=loginError%>
     </div>
 </div>
 <%
