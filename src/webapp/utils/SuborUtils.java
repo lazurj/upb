@@ -100,7 +100,7 @@ public class SuborUtils {
 	public static void addStuff(File vstup_subor, File vystup_subor) throws IOException
 	{
 		String filename = vstup_subor.getName();
-		String hash = getHashByFilename(filename, true); // test == true
+		String hash = getHashByFilename(filename, false); // test == true
 		addHash(hash.length(), hash, vstup_subor, vystup_subor);
 	}
 	
