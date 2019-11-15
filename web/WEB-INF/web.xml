@@ -63,4 +63,13 @@
         <url-pattern>/login</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>FileInfoServlet</servlet-name>
+        <servlet-class>webapp.FileInfoServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FileInfoServlet</servlet-name>
+        <url-pattern>/fileinfo</url-pattern>
+    </servlet-mapping>
+
 </web-app>

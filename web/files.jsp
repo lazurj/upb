@@ -9,7 +9,6 @@
 <html>
 <head>
     <title>Files</title>
-    <title>Main</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
     <link rel="stylesheet" type="text/css" href="styles.css">
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
@@ -25,19 +24,40 @@
             <div class="box">
 
                 <h2 class="title">List of uploaded files</h2>
+
+                <%--TODO--%>
+                <%--Treba nastavit form action na Filter sluzbu--%>
+                <form>
+                    <div class="control">
+                        <label class="radio">
+                            <input type="radio" name="filter" checked>
+                            My files
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="filter">
+                            Shared files
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="filter">
+                            All files
+                        </label>
+                    </div>
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Search">
+                    </div>
+                    <button class="button is-dark is-fullwidth" type="submit" name="filterSubmit">
+                        <span class="icon is-small"><i class="fas fa-search"></i></span>
+                        <span>Search</span>
+                    </button>
+                </form>
+                <hr>
                 <table class="table is-striped is-hoverable is-fullwidth" style="border: 2px solid #dbdbdb">
                     <thead>
                     <th>Name</th>
                     <th>Length</th>
                     <th></th>
-                    <th></th>
                     </thead>
-                    <%-- Fetching the attributes of the request object
-                         which was previously set by the servlet
-                          "StudentServlet.java"
-                    --%>
                     <%
-
                         String msg = (String) request.getAttribute("keymsg");
                         List<File> files =
                                 (List<File>) request.getAttribute("files");
@@ -45,11 +65,16 @@
                         if (files != null && files.size() > 0) {
                             for (File file : files) {%>
                     <tbody>
-                    <td><%=file.getName()%>
+                    <td><i class="fas fa-file-archive"></i><span style="padding-left: 0.5em;"><%=file.getName()%></span>
                     </td>
                     <td><%=file.length()%>
                     </td>
-                    <td><%="<button class=\"button\" onclick=\"document.getElementById('fileToDecrypt').value='" + file.getName() + "'\">Select<//button>"%>
+                    <td>
+                        <form action="fileinfo" method="post">
+                            <input type="hidden" name="fileName" value=<%="\"" + file.getName() + "\""%>>
+                            <input type="hidden" name="file" value=<%="\"" + file + "\""%>>
+                            <button type="submit" class="button">Info</button>
+                        </form>
                     </td>
 
                     <%
@@ -66,52 +91,6 @@
                 <strong><%=msg%>
                 </strong><br>
                 <%}%>
-                <form action="decrypt" method="post">
-                    <div class="field is-horizontal">
-                        <div class="field-label is-normal">
-                            <label class="label">Selected folder:</label>
-                        </div>
-                        <div class="field-body">
-                            <div class="field">
-                                <input class="input" class="read-only" id="fileToDecrypt" type="text" required
-                                       name="fileToDecrypt"/>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="field is-horizontal">
-                        <div class="field-label is-normal">
-                            <label class="label is-normal"></label>
-                        </div>
-                        <div class="field-body">
-                            <div class="field">
-                                <button class="button is-dark is-fullwidth clear-top-radius" type="submit" name="decrypt"
-                                        value="Decrypt">
-                                    <span class="icon is-small"><i class="fas fa-unlock-alt"></i></span>
-                                    <span>Decrypt</span>
-                                    file
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="field has-addons">
-                        <p class="control" style="width: 100%;">
-                            <button class="button is-dark is-fullwidth" type="submit" name="download"
-                                    value="download">
-                                <span class="icon is-small"><i class="fas fa-file-download"></i></span>
-                                <span>Download</span>
-                            </button>
-                        </p>
-                        <p class="control" style="width: 100%;">
-                            <button class="button is-dark is-fullwidth" type="submit" name="delete"
-                                    value="delete">
-                                <span class="icon is-small"><i class="fas fa-trash-alt"></i></span>
-                                <span>Delete</span>
-                            </button>
-                        </p>
-                    </div>
-                </form>
             </div>
             <a class="button is-link is-fullwidth" class="link" href="./upload">Return</a>
         </section>

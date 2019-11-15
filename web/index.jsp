@@ -56,7 +56,7 @@
                     <%--                    <textarea class="textarea clear-radius" placeholder="Enter your pulbic key to encrypy selected file..."--%>
                     <%--                              name="publicKey"--%>
                     <%--                              required></textarea>--%>
-
+                    <input type="hidden" name="user" value=""/>
                     <div id="userSelect" class="field">
                         <label class="label">Sharing file with others:</label>
                         <div class="control is-expanded">
@@ -78,7 +78,7 @@
                         <p class="help"><i>Hold Ctrl to select mutliple</i></p>
                     </div>
                     <%--Nastav hodnotu VALUE na id pouzivatela--%>
-                    <input type="hidden" name="user" value=""/>
+
                     <button class="button is-dark is-fullwidth clear-top-radius" value="upload">
                         <span class="icon is-small"><i class="fas fa-lock"></i></span>
                         <span>Upload file for encryption</span>

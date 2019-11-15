@@ -74,24 +74,41 @@
 /*}*/
 
 body {
-    background-color: rgb(251, 252, 255);
-
-    height: 100%;
+    background-color: rgb(181, 206, 255);
+    min-height: 100vh;
+    /*height: 100%;*/
 }
 
 body::before {
     content: "";
-    position: absolute;
-    top: 0;
+    position: fixed;
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: .1;
+    opacity: .15;
     background-image: url("bg.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+    background-attachment: fixed;
 }
+
+/*.cover {*/
+/*    position: fixed;*/
+/*    bottom: 0;*/
+/*    left: 0;*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*    opacity: .15;*/
+/*    background-image: url("bg.png");*/
+/*    background-position: center;*/
+/*    background-repeat: no-repeat;*/
+/*    background-size: cover;*/
+/*    background-attachment: fixed;*/
+/*    z-index: -1;*/
+/*}*/
+
 
 pre {
     white-space: pre-wrap !important;
@@ -139,4 +156,33 @@ pre {
 
 .toast-fade {
     opacity: 0;
+}
+
+.card .card-header .card-header-date {
+    float: right;
+    align-items: center;
+    padding: .75rem 1rem;
+}
+
+.comment {
+    border: 1px solid #dbdbdb;
+    /*background: rgb(240, 240, 240);*/
+}
+
+.comment hr {
+    background-color: #dbdbdb;
+}
+
+.comment .card-header {
+    background: rgb(240, 240, 240);
+    border-bottom-color: #dbdbdb;
+}
+
+.comment .card-footer {
+    background: rgb(240, 240, 240);
+    border-top-color: #dbdbdb;
+}
+
+.table form {
+    margin-block-end: 0px;
 }
