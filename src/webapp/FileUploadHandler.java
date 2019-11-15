@@ -52,10 +52,9 @@ public class FileUploadHandler extends HttpServlet {
                   //  if(!item.isFormField()){
                         String fieldName = item.getFieldName();
                         if ("file".equals(fieldName)){
-                            originalName = item.getName();
-                            UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), "enc_" +item.getName());
+                            UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), item.getName());
                             name = userFileInfo != null ? new Date().getTime() + "_" +item.getName() : item.getName();
-                            file = new File(loggedUser.getDirectory() +File.separator + name);
+                            file = new File(UPLOAD_DIRECTORY +File.separator + name);
                             item.write(file);
                             fileName = file.getName();
                         }
@@ -65,13 +64,12 @@ public class FileUploadHandler extends HttpServlet {
                        }
                 }
                 //sifrovanie log usera
-                AsyncCrypto.encUserFile(loggedUser,file,fileName);
+                AsyncCrypto.encUserFile(loggedUser,file,fileName, true);
                 //sifrovanie zdielanych
                 if (!usersShare.isEmpty()){
                     for (User u: usersShare) {
-                        UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(u.getId()), "enc_" +originalName);
-                        String uniqueFileName = userFileInfo != null ? new Date().getTime() + "_" +originalName : originalName;
-                        AsyncCrypto.encUserFile(u,file,uniqueFileName);
+                        UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), file.getName());
+                        AsyncCrypto.shareFile(loggedUser, u, userFileInfo);
                     }
                 }
 
@@ -81,9 +79,7 @@ public class FileUploadHandler extends HttpServlet {
             } catch (Exception ex) {
                 request.setAttribute("message", "File Upload Failed due to " + ex);
             } finally {
-                if(file != null) {
-                    file.delete();
-                }
+
             }
         }else{
             request.setAttribute("message",

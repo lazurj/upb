@@ -1,8 +1,6 @@
 package webapp;
 
-import database.Database;
 import database.dto.User;
-import database.dto.UserKey;
 import database.dto.Util.DtoUtils;
 
 import javax.servlet.ServletException;
@@ -52,24 +50,6 @@ public class KeygenServlet extends HttpServlet {
             in.close();
             outFile.flush();
         }
-        if ("generate".equals(request.getParameter("b"))) {
-            Database.insertUserKey(loggedUser.getId());
-            try {
-                UserKey key = Database.findMaxUserKeyByUserId(loggedUser.getId());
-                request.setAttribute("privateKey", key.getPrivateKey());
-                request.setAttribute("publicKey", key.getPublicKey());
-                request.getRequestDispatcher("/keygen.jsp").forward(request, response);
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            request.getRequestDispatcher("/keygen.jsp").forward(request, response);
-        }
-
-
-
-
     }
 
     @Override
@@ -89,9 +69,8 @@ public class KeygenServlet extends HttpServlet {
 
             //CryptoUtils.setpublicKey(publicKey,privateKey);
 
-            UserKey key = Database.findMaxUserKeyByUserId(user.getId());
-            request.setAttribute("privateKey", key.getPrivateKey());
-            request.setAttribute("publicKey", key.getPublicKey());
+            request.setAttribute("privateKey", user.getPrivateKey());
+            request.setAttribute("publicKey", user.getPublicKey());
             request.getRequestDispatcher("/keygen.jsp").forward(request, response);
 
 

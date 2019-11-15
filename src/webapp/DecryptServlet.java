@@ -45,10 +45,10 @@ public class DecryptServlet extends HttpServlet {
                 boolean badKey = true;
                 boolean wrongFile = true;
 
-                if (fileName != null && !fileName.isEmpty() && !"dec_".equals(fileNameSep) && "enc_".equals(fileNameSep)) {
+                if (fileName != null && !fileName.isEmpty()) {
                     wrongFile = false;
                     UserFileInfo fileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), fileName);
-                    String privateKey = fileInfo.getUserKey().getPrivateKey();
+                    String privateKey = loggedUser.getPrivateKey();
                     File decFile = null;
                     if (privateKey != null) {
                         AsyncCrypto ac = null;
@@ -114,9 +114,10 @@ public class DecryptServlet extends HttpServlet {
                 
                 /* hash to header - end */
                 
+
+                FileInputStream in = new FileInputStream(file);
                 response.setHeader("Content-disposition", "attachment; filename=" + fileName);
                 OutputStream outFile = response.getOutputStream();
-                FileInputStream in = new FileInputStream(file);
                 byte[] buffer = new byte[4096];
                 int length;
                 while ((length = in.read(buffer)) > 0) {

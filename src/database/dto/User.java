@@ -2,8 +2,6 @@ package database.dto;
 
 import webapp.FileUploadHandler;
 
-import java.io.File;
-
 /**
  * Created by Jakub on 6.11.2019.
  */
@@ -15,6 +13,8 @@ public class User {
     private String salt;
     private String email;
     private String directory;
+    private String privateKey;
+    private String publicKey;
 
 
     public Long getId() {
@@ -57,9 +57,25 @@ public class User {
         this.email = email;
     }
 
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
     public String getDirectory() {
         if(directory == null) {
-            directory = FileUploadHandler.UPLOAD_DIRECTORY + File.separator +this.userName;
+            directory = FileUploadHandler.UPLOAD_DIRECTORY;
         }
         return directory;
     }

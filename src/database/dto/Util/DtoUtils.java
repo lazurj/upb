@@ -1,10 +1,7 @@
 package database.dto.Util;
 
 import database.Database;
-import database.dto.FileInfo;
-import database.dto.User;
-import database.dto.UserFileInfo;
-import database.dto.UserKey;
+import database.dto.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -32,29 +29,9 @@ public class DtoUtils {
                 u.setUserName(rs.getString("userName"));
                 u.setSalt(rs.getString("salt"));
                 u.setEmail(rs.getString("email"));
+                u.setPrivateKey(rs.getString("private_key"));
+                u.setPublicKey(rs.getString("public_key"));
                 result.add(u);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-
-
-    public static List<UserKey> convertToUserKey(ResultSet rs) {
-        List<UserKey> result = new ArrayList<>();
-        if(rs == null) {
-            return result;
-        }
-        try {
-            while (rs.next()) {
-                UserKey uk = new UserKey();
-                uk.setId(rs.getLong("id"));
-                uk.setPrivateKey(rs.getString("private_key"));
-                uk.setPublicKey(rs.getString("public_key"));
-                uk.setUserId(rs.getLong("user_id"));
-                result.add(uk);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -92,9 +69,50 @@ public class DtoUtils {
                 ufi.setId(rs.getLong("id"));
                 ufi.setUserId(rs.getLong("user_id"));
                 ufi.setFileInfoId(rs.getLong("file_info_id"));
-                ufi.setUserKeyId(rs.getLong("user_key_id"));
                 ufi.setHashKey(rs.getString("hash_key"));
                 result.add(ufi);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static List<Comment> convertComment(ResultSet rs) {
+        List<Comment> result = new ArrayList<>();
+        if(rs == null) {
+            return result;
+        }
+        try {
+            while (rs.next()) {
+                Comment c = new Comment();
+                c.setId(rs.getLong("id"));
+                c.setFileId(rs.getLong("file_id"));
+                c.setUserId(rs.getLong("user_id"));
+                c.setText(rs.getString("text"));
+                c.setCreateDate(rs.getDate("create_date"));
+                result.add(c);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static List<Request> convertRequest(ResultSet rs) {
+        List<Request> result = new ArrayList<>();
+        if(rs == null) {
+            return result;
+        }
+        try {
+            while (rs.next()) {
+                Request r = new Request();
+                r.setId(rs.getLong("id"));
+                r.setFileId(rs.getLong("file_id"));
+                r.setRequestUserId(rs.getLong("user_id"));
+                r.setOwnerId(rs.getLong("owner_id"));
+                r.setCreateDate(rs.getDate("create_date"));
+                result.add(r);
             }
         } catch (SQLException e) {
             e.printStackTrace();

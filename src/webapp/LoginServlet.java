@@ -6,8 +6,10 @@ import webapp.utils.AsyncCrypto;
 import webapp.utils.Validators;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
-import java.io.File;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -102,9 +104,6 @@ public class LoginServlet extends HttpServlet {
                         }
                         Long userId = Database.insertUser(username, password, email);
                         User newUser = Database.findUserById(userId);
-                        Database.insertUserKey(userId);
-                        File userDir = new File(newUser.getDirectory());
-                        userDir.mkdir();
                         request.setAttribute("registerComplete", true);
                         request.getRequestDispatcher("/login.jsp").forward(request, response);
                         return;

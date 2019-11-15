@@ -2,7 +2,8 @@ package webapp.utils;
 
 import database.Database;
 import database.dto.User;
-import database.dto.UserKey;
+import database.dto.UserFileInfo;
+import org.apache.commons.io.FileUtils;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
@@ -228,31 +229,57 @@ public class AsyncCrypto {
         return hexString.toString();
     }
 
-    public static boolean encUserFile(User user, File file , String fileName){
+    public static boolean shareFile(User owner, User user, UserFileInfo ownerFile){
         try {
-            File encFile = new File (user.getDirectory() + File.separator +"enc_"+ fileName);
+            AsyncCrypto asyncCrypto = new AsyncCrypto();
+
+            String hashKey = ownerFile.getHashKey();
+            byte[] data = Base64.getDecoder().decode(hashKey);
+            String fullKey = null;
+            PrivateKey pk = asyncCrypto.getPrivateKey(owner.getPrivateKey());
+            if (pk != null) {
+                fullKey = asyncCrypto.decrypt(data, pk);
+                //generovanie symetrickeho kluca
+                //zasifrovanie sym kluca verejnym klucom
+                byte[] encKey = asyncCrypto.encrypt(fullKey, asyncCrypto.getPublicKey(user.getPublicKey()));
+                String encKeyValue = Base64.getEncoder().encodeToString(encKey);
+
+                Database.insertUserFile(user.getId(), ownerFile.getFileInfoId(), encKeyValue, false);
+            }
+
+        }
+        catch (Exception e){
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean encUserFile(User user, File file , String fileName, boolean isOwner){
+        try {
+            File tmpFile = new File(user.getDirectory() + File.separator + "temp_" +fileName);
+            FileUtils.copyFile(file, tmpFile);
+
             //generovanie symetrickeho kluca
             String key = CryptoUtils.generateRandomKey(16);
             String salt = CryptoUtils.generateRandomKey(18);
             String fullKey = key + salt;
             //zasifrovanie sym kluca verejnym klucom
             AsyncCrypto asyncCrypto = new AsyncCrypto();
-            UserKey userKey = Database.findMaxUserKeyByUserId(user.getId());
-            byte[] encKey = asyncCrypto.encrypt(fullKey,asyncCrypto.getPublicKey(userKey.getPublicKey()));
+            byte[] encKey = asyncCrypto.encrypt(fullKey,asyncCrypto.getPublicKey(user.getPublicKey()));
             String encKeyValue = Base64.getEncoder().encodeToString(encKey);
 
-            Long fileId = Database.insertFile(encFile.getName(), "mac");
-            Database.insertUserFile(user.getId(), fileId,userKey.getId(),encKeyValue);
+            Long fileId = Database.insertFile(file.getName(), "mac");
+            Database.insertUserFile(user.getId(), fileId, encKeyValue, isOwner);
             String content = new String(Files.readAllBytes(Paths.get(file.getPath())));
 
             // String content1 = Base64.getEncoder().encodeToString(Files.readAllBytes(Paths.get(file.getPath())));
             byte[] hashofFile = AsyncCrypto.hmacDigestBytes(content,"password",HMAC_SHA256);
-            CryptoUtils.encrypt(key, salt, file, encFile, hashofFile,encKey);
+            CryptoUtils.encrypt(key, salt,tmpFile , file, hashofFile,encKey);
+            tmpFile.delete();
         }
         catch (Exception e){
             return false;
         }
-
         return true;
     }
 
