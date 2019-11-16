@@ -1,3 +1,4 @@
+<%@ page import="database.dto.FileInfo" %>
 <%@ page import="java.io.File" %><%--
   Created by IntelliJ IDEA.
   User: Rastik
@@ -59,20 +60,20 @@
                     </thead>
                     <%
                         String msg = (String) request.getAttribute("keymsg");
-                        List<File> files =
-                                (List<File>) request.getAttribute("files");
+                        List<FileInfo> files =
+                                (List<FileInfo>) request.getAttribute("files");
 
                         if (files != null && files.size() > 0) {
-                            for (File file : files) {%>
+                            for (FileInfo file : files) {%>
                     <tbody>
-                    <td><i class="fas fa-file-archive"></i><span style="padding-left: 0.5em;"><%=file.getName()%></span>
+                    <td><i class="fas fa-file-archive"></i><span style="padding-left: 0.5em;"><%=file.getFileName()%></span>
                     </td>
-                    <td><%=file.length()%>
+                    <td><%=file.getFile().length()%>
                     </td>
                     <td>
                         <form action="fileinfo" method="post">
-                            <input type="hidden" name="fileName" value=<%="\"" + file.getName() + "\""%>>
-                            <input type="hidden" name="file" value=<%="\"" + file + "\""%>>
+                            <input type="hidden" name="fileName" value=<%="\"" + file.getFileName() + "\""%>>
+                            <input type="hidden" name="fileId" value=<%="\"" + file.getId() + "\""%>>
                             <button type="submit" class="button">Info</button>
                         </form>
                     </td>

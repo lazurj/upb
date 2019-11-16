@@ -5,7 +5,12 @@
   Time: 19:45
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page import="java.io.File" %>
+<%@ page import="database.Database" %>
+<%@ page import="database.dto.Comment" %>
+<%@ page import="database.dto.FileInfo" %>
+<%@ page import="database.dto.Request" %>
+<%@ page import="database.dto.UserFileInfo" %>
+<%@ page import="webapp.utils.TimeUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -17,8 +22,11 @@
 <body>
 <%@include file="navbar.jsp" %>
 <%
-    String fileName = (String) request.getAttribute("fileName");
-    File file = new File(fileName);
+    User owner = (User) request.getAttribute("fileOwner");
+    Request userRequest = request.getAttribute("userRequest") != null ? (Request) request.getAttribute("userRequest") : null;
+    List<Request> requests = request.getAttribute("requests") != null ? (List<Request>) request.getAttribute("requests") : null;
+    UserFileInfo userFileInfo = request.getAttribute("userFileInfo") != null ? (UserFileInfo) request.getAttribute("userFileInfo") : null;
+    FileInfo file = (FileInfo) request.getAttribute("file");
 %>
 <div class="cover"></div>
 <section class="section">
@@ -28,13 +36,21 @@
                 <div class="column">
                     <div class="box">
                         <h2 class="title"><i class="fas fa-file-archive"></i><span
-                                style="padding-left: 0.5em;"><%= file.getName()%></span>
+                                style="padding-left: 0.5em;"><%= file.getFileName()%></span>
+                            <span
+                                    style="padding-left: 0.8em;">(<%= owner.getUserName()%>)</span>
                         </h2>
                         <form action="decrypt" method="post">
                             <input type="hidden" id="fileToDecrypt"
-                                    <%="value=\"" + file.getName() + "\""%>
+                                    <%="value=\"" + file.getFileName() + "\""%>
                                    name="fileToDecrypt"/>
+                            <input type="hidden" id="fileId"
+                                    <%="value=\"" + file.getId().longValue() + "\""%>
+                                   name="fileId"/>
                             <%--Zobraz vtedy ak vlastnim subor alebo mi ho niekto sharol--%>
+                            <%
+                                if(userFileInfo != null) {
+                            %>
                             <div class="field">
                                 <button class="button is-dark is-fullwidth" type="submit"
                                         name="decrypt"
@@ -62,8 +78,10 @@
                                     <span>Delete</span>
                                 </button>
                             </div>
-                            <%--END--%>
-                            <%--Zobraz len vtedy ak nevlastnim subor a este som si nepoziadal o share request--%>
+                            <%
+                                }
+                                if(userFileInfo == null && userRequest == null) {
+                            %>
                             <div class="field">
                                 <button class="button is-dark is-fullwidth" type="submit"
                                         name="shareRequest"
@@ -72,8 +90,10 @@
                                     <span>Request for sharing</span>
                                 </button>
                             </div>
-                            <%--END--%>
-                            <%--Zobraz len vtedy ak nevlastnim subor a este som si nepoziadal o share request--%>
+                            <%
+                                }
+                                if(userFileInfo == null && userRequest != null) {
+                            %>
                             <div class="field">
                                 <button class="button is-dark is-fullwidth" type="submit"
                                         name="shareRequest"
@@ -82,48 +102,62 @@
                                     <span class="icon is-small"><i class="fas fa-share-square"></i></span>
                                     <span>Request for sharing</span>
                                 </button>
-                                <p class="help">You are waiting for owner to accept share request...</p>
+                                <p class="help">You are waiting for <%= owner.getUserName()%> to accept your share request. Request sended: <%=TimeUtil.formatDate(userRequest.getCreateDate())%></p>
                             </div>
+                            <%
+                                }
+                            %>
                             <%--END--%>
                         </form>
                     </div>
                 </div>
                 <%--Zobraz len ak vlastnim subor--%>
+                <%
+                    if(userFileInfo != null && Boolean.TRUE.equals(userFileInfo.getOwnerFlag())) {
+                %>
                 <div class="column is-one-quarter">
                     <div class="box">
                         <h2 class="subtitle">
                             Share requests
                         </h2>
                         <hr>
-
-                        <%--TODO--%>
-                        <%--Dopln action pre form--%>
-                        <form>
+                        <%
+                            if(requests != null && !requests.isEmpty()) {
+                        %>
+                        <form action="fileinfo" method="post">
+                            <input type="hidden" id="fileId"
+                                    <%="value=\"" + file.getId().longValue() + "\""%>
+                                   name="fileId"/>
                             <%--FOR pre vsetky share requesty--%>
+                            <%
+                            for(Request req : requests) {
+                            %>
                             <div class="field">
                                 <div class="control">
                                     <label class="checkbox">
-                                        <input type="checkbox">
-                                        Rastikm
+                                        <input type="checkbox" name="applicants" value="<%=req.getId().longValue()%>">
+                                        <%=req.getRequestUser().getUserName()%>
                                     </label>
                                 </div>
                             </div>
-                            <div class="field">
-                                <div class="control">
-                                    <label class="checkbox">
-                                        <input type="checkbox">
-                                        Jakub
-                                    </label>
-                                </div>
-                            </div>
+                            <%
+                            }
+                            %>
                             <%--END--%>
-
-                            <button class="button is-dark is-fullwidth" type="submit" name="acceptShareRequest"
-                                    value="acceptShareRequest">Share this file
+                            <button class="button is-dark is-halfwidth" type="submit" name="acceptShareRequest"
+                                    value="acceptShareRequest">Accept
+                            </button>
+                            <button class="button is-dark is-halfwidth" type="submit" name="declineShareRequest"
+                                    value="declineShareRequest">Decline
                             </button>
                         </form>
+                    <%
+                        }
+                    %>
                     </div>
-
+                <%
+                    }
+                %>
                 </div>
                 <%--END--%>
             </div>
@@ -136,32 +170,42 @@
 
                 <%--TOTO TU JE VZOR KOMENTARA--%>
                 <%--FOR pre vsetky komentare pre dany subor--%>
+                <%
+                    List<Comment> commets = Database.findCommentByFileId(Long.valueOf(file.getId()));
+                    for(Comment comment : commets) {
+                %>
                 <article class="message is-dark comment">
                     <div class="message-header">
                         <%--Meno autora komentara--%>
-                        <p>Admin</p>
+                        <p><%=comment.getUser().getUserName()%></p>
                         <%--END--%>
 
                         <%--datum napisania komentara--%>
                         <p>
-                            (14.11.2019 21:28)
+                            <%=TimeUtil.formatDate(comment.getCreateDate())%>
                         </p>
                         <%--END--%>
                     </div>
 
                     <%--TELO spravy komentara (text, teda samotny komentar)--%>
                     <div class="message-body">
-                        Python file... What a looser
+                        <%=comment.getText()%>
                     </div>
                     <%--END--%>
                 </article>
+                <%
+                    }
+                %>
                 <%--END--%>
 
                 <%--TODO--%>
                 <%--Treba nastavit action pre formular--%>
-                <form>
-                    <textarea class="textarea" placeholder="Write your comment here..."></textarea>
-                    <button class="button is-dark is-fullwidth clear-top-radius" value="upload">
+                <form action="fileinfo" method="post">
+                    <input type="hidden" id="fileId"
+                            <%="value=\"" + file.getId().longValue() + "\""%>
+                           name="fileId"/>
+                    <textarea class="textarea" name="commentText" placeholder="Write your comment here..."></textarea>
+                    <button class="button is-dark is-fullwidth clear-top-radius" name="comment" value="comment">
                         <span>Send comment</span>
                     </button>
                 </form>

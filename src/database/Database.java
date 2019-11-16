@@ -1,8 +1,6 @@
 package database;
 
-import database.dto.FileInfo;
-import database.dto.User;
-import database.dto.UserFileInfo;
+import database.dto.*;
 import database.dto.Util.DtoUtils;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
@@ -23,7 +21,7 @@ public class Database {
         try {
             Class.forName("org.sqlite.JDBC");
             //TODO prepis si cestu
-            return DriverManager.getConnection("jdbc:sqlite:C:/Users/Jakub/Desktop/UPB/sample2.db");
+            return DriverManager.getConnection("jdbc:sqlite:C:/Users/Jakub/Desktop/UPB/sample3.db");
             //return DriverManager.getConnection("jdbc:sqlite:C:/Users/Domin/OneDrive/Plocha/upb-master/sample.db");
 
         } catch (ClassNotFoundException e) {
@@ -44,7 +42,7 @@ public class Database {
             statement.executeUpdate("create table if not exists file_info (id integer PRIMARY KEY AUTOINCREMENT, file_name string NOT NULL, mac string NOT NULL)");
             statement.executeUpdate("create table if not exists user_file (id integer PRIMARY KEY AUTOINCREMENT, file_info_id integer NOT NULL, user_id integer NOT NULL, hash_key string NOT NULL, owner_flag boolean  NOT NULL, FOREIGN KEY(user_id) REFERENCES user(id),FOREIGN KEY(file_info_id) REFERENCES file_info(id))");
             statement.executeUpdate("create table if not exists comment (id integer PRIMARY KEY AUTOINCREMENT, text string, file_id integer NOT NULL, user_id integer not null, create_date date , FOREIGN KEY(user_id) REFERENCES user(id), FOREIGN KEY(file_id) REFERENCES file_info(id))");
-            statement.executeUpdate("create table if not exists request (id integer PRIMARY KEY AUTOINCREMENT, file_id integer NOT NULL, owner_id integer not null, user_id integer not null, create_date date , FOREIGN KEY(owner_id) REFERENCES user(id), FOREIGN KEY(user_id) REFERENCES user(id), FOREIGN KEY(file_id) REFERENCES file_info(id))");
+            statement.executeUpdate("create table if not exists request (id integer PRIMARY KEY AUTOINCREMENT, file_id integer NOT NULL, owner_id integer not null, user_id integer not null, create_date date, active_flag boolean, FOREIGN KEY(owner_id) REFERENCES user(id), FOREIGN KEY(user_id) REFERENCES user(id), FOREIGN KEY(file_id) REFERENCES file_info(id))");
 
             //statement.executeUpdate("insert into user values(1,'leo', 'password', 'salt', 'awd', 'awd','asdf')");
             //statement.executeUpdate("insert into user values(2,'admin', 'EL5h9EpBFGjo9lr3k3K7uBlJ7g1oQ4O/9bXP6AlIx+0=', 'salt2', 'awd', 'awd','asdf')");
@@ -136,6 +134,7 @@ public class Database {
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             List<FileInfo> files = DtoUtils.convertToFileInfo(rs);
+
             return !files.isEmpty() ? files.get(0) : null;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -143,10 +142,77 @@ public class Database {
         return null;
     }
 
-    public static List<FileInfo> findFileInfoByName(String fileName) {
+    public static List<Comment> findCommentByFileId(Long fileId) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement("select * from file_info where file_name = ?");
-            ps.setString(1, fileName);
+            PreparedStatement ps = getConnection().prepareStatement("select * from comment where file_id = ?");
+            ps.setLong(1, fileId);
+            ResultSet rs = ps.executeQuery();
+            List<Comment> comments = DtoUtils.convertToComment(rs);
+            for(Comment c : comments) {
+                c.setUser(findUserById(c.getUserId()));
+            }
+            return comments;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static List<Request> findRequestsByFileId(Long fileId) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from request where file_id = ? and active_flag = 1");
+            ps.setLong(1, fileId);
+            ResultSet rs = ps.executeQuery();
+            List<Request> requests = DtoUtils.convertToRequest(rs);
+            for(Request req : requests) {
+                req.setRequestUser(findUserById(req.getRequestUserId()));
+            }
+            return requests;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Request findRequestsByFileIdAndUserId(Long fileId, Long userId) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from request where file_id = ? and user_id = ? and active_flag = 1");
+            ps.setLong(1, fileId);
+            ps.setLong(2, userId);
+            ResultSet rs = ps.executeQuery();
+            List<Request> requests = DtoUtils.convertToRequest(rs);
+            for(Request req : requests) {
+                req.setRequestUser(findUserById(req.getRequestUserId()));
+            }
+            return requests != null && !requests.isEmpty() ? requests.get(0) : null;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Request findRequestsById(Long id) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from request where id = ?");
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+            List<Request> requests = DtoUtils.convertToRequest(rs);
+            for(Request req : requests) {
+                req.setRequestUser(findUserById(req.getRequestUserId()));
+            }
+            return requests != null && !requests.isEmpty() ? requests.get(0) : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public static List<FileInfo> getAllFileInfo() {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from file_info");
             ResultSet rs = ps.executeQuery();
             return DtoUtils.convertToFileInfo(rs);
         } catch (SQLException e) {
@@ -172,22 +238,27 @@ public class Database {
         return null;
     }
 
-    public static List<UserFileInfo> findUserFilesByUserIdAndFileId(Long userId) {
+
+
+    public static UserFileInfo findUserFilesByUserIdAndFileId(Long userId, Long fileId) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement("select * from user_file where user_id= ?");
+            PreparedStatement ps = getConnection().prepareStatement("select * from user_file where user_id= ? and file_info_id = ?");
             ps.setLong(1, userId);
+            ps.setLong(2, fileId);
             ResultSet rs = ps.executeQuery();
             List<UserFileInfo> results = DtoUtils.convertToUserFileInfo(rs);
             for(UserFileInfo result : results) {
                 result.setUser(findUserById(result.getUserId()));
                 result.setFileInfo(findFileInfoById(result.getFileInfoId()));
             }
-            return results;
+            return results != null && !results .isEmpty() ? results.get(0) : null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
+
+
 
     public static Long insertUser(String username, String password, String email){
         Long userId = null;
@@ -258,6 +329,55 @@ public class Database {
         return id;
     }
 
+    public static Long insertComment(Long fileId, Long userId, String text){
+        Long id = null;
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("INSERT INTO comment (user_id, file_id, text, create_date) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1,userId);
+            ps.setLong(2,fileId);
+            ps.setString(3,text);
+            ps.setDate(4, new Date(new java.util.Date().getTime()));
+            ps.executeUpdate();
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                id = generatedKeys.getLong(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    public static Long insertRequest(Long fileId, Long userId, Long ownerId){
+        Long id = null;
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("INSERT INTO request (user_id, file_id, owner_id ,create_date, active_flag) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1,userId);
+            ps.setLong(2,fileId);
+            ps.setLong(3,ownerId);
+            ps.setDate(4, new Date(new java.util.Date().getTime()));
+            ps.setBoolean(5, true);
+            ps.executeUpdate();
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                id = generatedKeys.getLong(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    public static void deactivateRequest(Long requestId) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("UPDATE request SET active_flag = false where id = ?");
+            ps.setLong(1, requestId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static List<User> findOtherUsers(Long Id) {
         try {
             PreparedStatement ps = getConnection().prepareStatement("select * from user where id != ?");
@@ -265,6 +385,21 @@ public class Database {
             ResultSet rs = ps.executeQuery();
             List<User> results = DtoUtils.convertToUser(rs);
             return results;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static User findFileOwner(Long fileId) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select * from user_file where file_info_id = ? and owner_flag = 1");
+            ps.setLong(1, fileId);
+            ResultSet rs = ps.executeQuery();
+            List<UserFileInfo> results = DtoUtils.convertToUserFileInfo(rs);
+            if(results.size() == 1) {
+                return findUserById(results.get(0).getUserId());
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

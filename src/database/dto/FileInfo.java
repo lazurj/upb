@@ -39,7 +39,7 @@ public class FileInfo {
         this.mac = mac;
     }
 
-    public File getFile(String userName) {
+    public File getFile() {
         if(file == null) {
             file = new File(FileUploadHandler.UPLOAD_DIRECTORY +File.separator +this.fileName);
         }

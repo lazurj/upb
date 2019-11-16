@@ -65,7 +65,7 @@ public class DecryptServlet extends HttpServlet {
                                 if (keySalt != null) {
                                     fileName = fileName.substring(4, fileName.length());
                                     decFile = new File(loggedUser.getDirectory() + File.separator + "dec_" + fileName);
-                                    if (CryptoUtils.decrypt(pk, fileInfo.getFileInfo().getFile(loggedUser.getUserName()), decFile)) {
+                                    if (CryptoUtils.decrypt(pk, fileInfo.getFileInfo().getFile(), decFile)) {
                                         request.setAttribute("keymsg", "Done. Integrity check OK.");
                                     } else {
                                         request.setAttribute("keymsg", "Your file was modified.");
@@ -111,9 +111,9 @@ public class DecryptServlet extends HttpServlet {
                 {
                 	SuborUtils.addStuff(file, file);
                 }*/
-                
+
                 /* hash to header - end */
-                
+
 
                 FileInputStream in = new FileInputStream(file);
                 response.setHeader("Content-disposition", "attachment; filename=" + fileName);
@@ -133,7 +133,6 @@ public class DecryptServlet extends HttpServlet {
         } else if (request.getParameter("delete") != null) {
             String fileName = request.getParameter("fileToDecrypt");
             if("OfflineDec.jar".equals(fileName)) {
-                File[] files = new File(loggedUser.getDirectory()).listFiles();
                 List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
                 request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
                 request.getRequestDispatcher("/files.jsp").forward(request, response);
@@ -143,50 +142,22 @@ public class DecryptServlet extends HttpServlet {
                     UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), fileName);
                     Database.DeleteRowFromUserFile(userFileInfo.getId());
                     Database.DeleteRowFromFileInfo(userFileInfo.getFileInfoId());
-                    userFileInfo.getFileInfo().getFile(loggedUser.getUserName()).delete();
+                    userFileInfo.getFileInfo().getFile().delete();
                 }
                 List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
                 request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
                 request.getRequestDispatcher("/files.jsp").forward(request, response);
             }
-
-        } else if (request.getParameter("getHash") != null) {
-            String fileName = request.getParameter("fileName");
-            String fileNameSep = fileName.substring(0, 4);
-            if("OfflineDec.jar".equals(fileName)) {
-                File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
-                request.setAttribute("files", files);
-                request.setAttribute("keymsg", "You can not download hash of this file.");
-                request.getRequestDispatcher("/files.jsp").forward(request, response);
-            } else if (!"enc_".equals(fileNameSep)) {
-                File[] files = new File(FileUploadHandler.UPLOAD_DIRECTORY).listFiles();
-                request.setAttribute("files", files);
-                request.setAttribute("keymsg", "You can not download hash of this file.");
-                request.getRequestDispatcher("/files.jsp").forward(request, response);
-            } else {
-                String hash = CryptoUtils.getKeyFromFile(fileName);
-                File keyFile = new File("hash.txt");
-                FileWriter writer = new FileWriter(keyFile);
-                StringBuilder sb = new StringBuilder();
-                writer.write("<-Generated Hash->");
-                writer.write(System.lineSeparator());
-                writer.write(hash);
-                writer.close();
-
-                response.setHeader("Content-disposition", "attachment; filename=" + keyFile.getName());
-                OutputStream outFile = response.getOutputStream();
-                FileInputStream in = new FileInputStream(keyFile);
-                byte[] buffer = new byte[4096];
-                int length;
-                while ((length = in.read(buffer)) > 0) {
-                    outFile.write(buffer, 0, length);
-                }
-                in.close();
-                outFile.flush();
-            }
+        } else if (request.getParameter("shareRequest") != null) {
+            Long fileId = Long.valueOf(request.getParameter("fileId"));
+            Database.insertRequest(fileId, loggedUser.getId(), Database.findFileOwner(fileId).getId());
+            /*request.setAttribute("fileId", fileId);
+            request.setAttribute("fileName", request.getParameter("fileToDecrypt"));
+            request.getRequestDispatcher("/fileInfo.jsp").forward(request, response);*/
+            request.setAttribute("files", Database.getAllFileInfo());
+            request.getRequestDispatcher("/files.jsp").forward(request, response);
         } else {
-            List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
-            request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
+            request.setAttribute("files", Database.getAllFileInfo());
             request.getRequestDispatcher("/files.jsp").forward(request, response);
         }
     }

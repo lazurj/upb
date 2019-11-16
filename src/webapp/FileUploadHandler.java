@@ -85,8 +85,7 @@ public class FileUploadHandler extends HttpServlet {
             request.setAttribute("message",
                     "Sorry this Servlet only handles file upload request");
         }
-        List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser .getId());
-        request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
+        request.setAttribute("files", Database.getAllFileInfo());
         request.getRequestDispatcher("/files.jsp").forward(request, response);
     }
 

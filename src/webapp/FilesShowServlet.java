@@ -2,7 +2,6 @@ package webapp;
 
 import database.Database;
 import database.dto.User;
-import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
 
 import javax.servlet.ServletException;
@@ -11,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet(name = "FilesShowServlet")
 public class FilesShowServlet extends HttpServlet {
@@ -22,8 +20,7 @@ public class FilesShowServlet extends HttpServlet {
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
-        List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
-        request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
+        request.setAttribute("files", Database.getAllFileInfo());
         request.getRequestDispatcher("/files.jsp").forward(request, response);
 
     }
@@ -35,9 +32,7 @@ public class FilesShowServlet extends HttpServlet {
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
-        List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser .getId());
-        request.setAttribute("files", DtoUtils.getUserFiles(userFiles));
+        request.setAttribute("files", Database.getAllFileInfo());
         request.getRequestDispatcher("/files.jsp").forward(request, response);
-
     }
 }

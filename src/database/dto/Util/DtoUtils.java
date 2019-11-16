@@ -5,10 +5,11 @@ import database.dto.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -70,6 +71,7 @@ public class DtoUtils {
                 ufi.setUserId(rs.getLong("user_id"));
                 ufi.setFileInfoId(rs.getLong("file_info_id"));
                 ufi.setHashKey(rs.getString("hash_key"));
+                ufi.setOwnerFlag(rs.getBoolean("owner_flag"));
                 result.add(ufi);
             }
         } catch (SQLException e) {
@@ -78,7 +80,7 @@ public class DtoUtils {
         return result;
     }
 
-    public static List<Comment> convertComment(ResultSet rs) {
+    public static List<Comment> convertToComment(ResultSet rs) {
         List<Comment> result = new ArrayList<>();
         if(rs == null) {
             return result;
@@ -96,10 +98,11 @@ public class DtoUtils {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        Collections.sort(result, new CommentCoparator());
         return result;
     }
 
-    public static List<Request> convertRequest(ResultSet rs) {
+    public static List<Request> convertToRequest(ResultSet rs) {
         List<Request> result = new ArrayList<>();
         if(rs == null) {
             return result;
@@ -112,6 +115,7 @@ public class DtoUtils {
                 r.setRequestUserId(rs.getLong("user_id"));
                 r.setOwnerId(rs.getLong("owner_id"));
                 r.setCreateDate(rs.getDate("create_date"));
+                r.setActiveFlag(rs.getBoolean("active_flag"));
                 result.add(r);
             }
         } catch (SQLException e) {
@@ -120,10 +124,10 @@ public class DtoUtils {
         return result;
     }
 
-    public static List<File> getUserFiles(List<UserFileInfo> userFiles) {
-        List<File> result = new ArrayList<>();
+    public static List<FileInfo> getUserFiles(List<UserFileInfo> userFiles) {
+        List<FileInfo> result = new ArrayList<>();
         for (UserFileInfo userFile : userFiles) {
-            result.add(userFile.getFileInfo().getFile(userFile.getUser().getUserName()));
+            result.add(userFile.getFileInfo());
         }
         return result;
     }
@@ -145,5 +149,13 @@ public class DtoUtils {
             return null;
         }
         return Database.findUserById(userId);
+    }
+
+    private static class CommentCoparator implements Comparator<Comment> {
+
+        @Override
+        public int compare(Comment o1, Comment o2) {
+            return -1 * o1.getCreateDate().compareTo(o2.getCreateDate());
+        }
     }
 }

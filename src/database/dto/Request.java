@@ -14,6 +14,7 @@ public class Request {
     private User owner;
     private User requestUser;
     private FileInfo file;
+    private Boolean activeFlag;
 
     public Long getId() {
         return id;
@@ -77,5 +78,13 @@ public class Request {
 
     public void setFile(FileInfo file) {
         this.file = file;
+    }
+
+    public Boolean getActiveFlag() {
+        return activeFlag;
+    }
+
+    public void setActiveFlag(Boolean activeFlag) {
+        this.activeFlag = activeFlag;
     }
 }

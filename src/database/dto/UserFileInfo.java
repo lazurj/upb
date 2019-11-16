@@ -11,6 +11,7 @@ public class UserFileInfo {
     User user;
     FileInfo fileInfo;
     String hashKey;
+    Boolean ownerFlag;
 
     public Long getId() {
         return id;
@@ -60,4 +61,11 @@ public class UserFileInfo {
         this.hashKey = hashKey;
     }
 
+    public Boolean getOwnerFlag() {
+        return ownerFlag;
+    }
+
+    public void setOwnerFlag(Boolean ownerFlag) {
+        this.ownerFlag = ownerFlag;
+    }
 }
