@@ -27,6 +27,7 @@ import java.util.List;
 public class DecryptServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
         User loggedUser = DtoUtils.getLoggedUser(request);
+
         if(loggedUser == null) {
             response.sendRedirect("./");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
@@ -48,7 +49,11 @@ public class DecryptServlet extends HttpServlet {
                 if (fileName != null && !fileName.isEmpty()) {
                     wrongFile = false;
                     UserFileInfo fileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), fileName);
-                    String privateKey = loggedUser.getPrivateKey();
+                    //String privateKey = loggedUser.getPrivateKey();
+                    HttpSession session = request.getSession(false);
+                    String privateKey = (String)session.getAttribute("privateKey");
+
+
                     File decFile = null;
                     if (privateKey != null) {
                         AsyncCrypto ac = null;
@@ -63,9 +68,10 @@ public class DecryptServlet extends HttpServlet {
                                 badKey = false;
                                 String keySalt = ac.decrypt(data, pk);
                                 if (keySalt != null) {
-                                    fileName = fileName.substring(4, fileName.length());
+                                    //  fileName = fileName.substring(4, fileName.length());
                                     decFile = new File(loggedUser.getDirectory() + File.separator + "dec_" + fileName);
-                                    if (CryptoUtils.decrypt(pk, fileInfo.getFileInfo().getFile(), decFile)) {
+                                    if (CryptoUtils.decrypt(keySalt.substring(0, 16), keySalt.substring(16, 34), fileInfo.getFileInfo().getFile(), decFile)) {
+                                    //if (CryptoUtils.decrypt(pk, fileInfo.getFileInfo().getFile(), decFile)) {
                                         request.setAttribute("keymsg", "Done. Integrity check OK.");
                                     } else {
                                         request.setAttribute("keymsg", "Your file was modified.");
@@ -140,9 +146,16 @@ public class DecryptServlet extends HttpServlet {
             } else {
                 if (fileName != null && !fileName.isEmpty()) {
                     UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), fileName);
-                    Database.DeleteRowFromUserFile(userFileInfo.getId());
-                    Database.DeleteRowFromFileInfo(userFileInfo.getFileInfoId());
-                    userFileInfo.getFileInfo().getFile().delete();
+                    if (userFileInfo.getOwnerFlag()){
+                        Database.deleteFileInfoIDFromUserFile(userFileInfo.getFileInfoId());
+                       // Database.DeleteRowFromUserFile(userFileInfo.getId());
+                        Database.DeleteRowFromFileInfo(userFileInfo.getFileInfoId());
+                        userFileInfo.getFileInfo().getFile().delete();
+                    }
+                   else {
+                        Database.DeleteRowFromUserFile(userFileInfo.getId());
+                    }
+
                 }
                 List<UserFileInfo> userFiles = Database.findUserFilesByUserId(loggedUser.getId());
                 request.setAttribute("files", DtoUtils.getUserFiles(userFiles));

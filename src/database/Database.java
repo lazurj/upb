@@ -2,6 +2,7 @@ package database;
 
 import database.dto.*;
 import database.dto.Util.DtoUtils;
+import webapp.utils.AES;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
 
@@ -10,6 +11,7 @@ import java.sql.*;
 import java.util.Base64;
 import java.util.List;
 
+import static webapp.utils.AES.encrypt;
 import static webapp.utils.AsyncCrypto.HMAC_SHA256;
 
 /**
@@ -21,7 +23,7 @@ public class Database {
         try {
             Class.forName("org.sqlite.JDBC");
             //TODO prepis si cestu
-            return DriverManager.getConnection("jdbc:sqlite:C:/Users/Jakub/Desktop/UPB/sample3.db");
+            return DriverManager.getConnection("jdbc:sqlite:C:/Users/Rastik/Desktop/UPB/sample3.db");
             //return DriverManager.getConnection("jdbc:sqlite:C:/Users/Domin/OneDrive/Plocha/upb-master/sample.db");
 
         } catch (ClassNotFoundException e) {
@@ -301,7 +303,8 @@ public class Database {
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-            ps.setString(5,asyncCrypto.PrivateKeyString());
+            String hashPrivateKey = AES.encrypt(asyncCrypto.PrivateKeyString(),password);
+            ps.setString(5,hashPrivateKey);
             ps.setString(6,asyncCrypto.PublicKeyString());
             ps.executeUpdate();
 
@@ -441,6 +444,23 @@ public class Database {
             System.out.println(e);
         }
     }
+
+
+    public static void deleteFileInfoIDFromUserFile(Long id)
+    {
+        try
+        {
+            PreparedStatement ps = getConnection().prepareStatement("DELETE FROM user_file WHERE file_info_id = ?");
+            ps.setLong(1,id);
+            ps.executeUpdate();
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+
+
 
     public static UserFileInfo findUserFileByUserIdandFile(Long userId,Long file_info_id) {
         try {

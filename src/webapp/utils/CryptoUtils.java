@@ -45,13 +45,16 @@ public class CryptoUtils
 
 		byte [] foo = Files.readAllBytes(Paths.get(outputFile.getPath()));
 		int one = 1;
-		ByteBuffer buf = ByteBuffer.allocateDirect(foo.length+hashofFile.length+4+encKey.length+4);
+		//buffer pridanie HASHKLUCA
+		//ByteBuffer buf = ByteBuffer.allocateDirect(foo.length+hashofFile.length+4+encKey.length+4);
+		ByteBuffer buf = ByteBuffer.allocateDirect(foo.length+hashofFile.length+4);
+
 		int hashofFileLength = hashofFile.length;
 		buf.putInt(hashofFile.length);
 
 		buf.put(hashofFile);
-		buf.putInt(encKey.length);
-		buf.put(encKey);
+		//buf.putInt(encKey.length);
+		//buf.put(encKey);
 		buf.put(foo);
 
 
@@ -63,8 +66,9 @@ public class CryptoUtils
 		//System.out.println(outputFile);
 		return true;
 	}
-	
-	public static boolean decrypt(PrivateKey pk,File inputFile, File outputFile) throws Exception {
+
+	public static boolean decrypt(String key, String salt, File inputFile, File outputFile) throws Exception {
+	//public static boolean decrypt(PrivateKey pk,File inputFile, File outputFile) throws Exception {
 
 		File fooFile = new File (inputFile.getName());
 		FileUtils.copyFile(inputFile,fooFile);
@@ -80,31 +84,17 @@ public class CryptoUtils
 			byte[] hash1 =  new byte[hashlength];
 			buf.get(hash1);
 
-			int hashkeylength = buf.getInt();
-			byte[] hashkey =  new byte[hashkeylength];
-			buf.get(hashkey);
-
 			byte[] data = new byte[buf.remaining()];
 			buf.get(data);
 
 			ByteBuffer bufContent = ByteBuffer.allocateDirect(data.length);
 			bufContent.put(data);
-			//System.out.println(buf);
 
 			FileChannel wChannel = new FileOutputStream(fooFile, false).getChannel();
 			bufContent.flip();
 			wChannel.write(bufContent);
 
 			wChannel.close();
-
-
-
-
-			AsyncCrypto ac = null;
-			String keySalt = ac.decrypt(hashkey, pk);
-			String key = keySalt.substring(0, 16);
-			String salt =  keySalt.substring(16, 34);
-
 
 			if (doCrypto(Cipher.DECRYPT_MODE, key, salt, fooFile, outputFile)){
 				String content = new String(Files.readAllBytes(Paths.get(outputFile.getPath())));

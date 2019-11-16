@@ -2,6 +2,7 @@ package webapp;
 
 import database.Database;
 import database.dto.User;
+import webapp.utils.AES;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.Validators;
 
@@ -70,6 +71,8 @@ public class LoginServlet extends HttpServlet {
                     HttpSession session = request.getSession();
                     session.setMaxInactiveInterval(45 * 60); //Zivotnost - 45 minut
                     session.setAttribute("loggedUser", user.getId());
+                    String  privateKey = AES.decrypt(user.getPrivateKey(),password);
+                    session.setAttribute("privateKey",privateKey);
                     request.getRequestDispatcher("/login.jsp").forward(request, response);
                 } else {
                     request.setAttribute("loginError", "Incorrect username or password");
