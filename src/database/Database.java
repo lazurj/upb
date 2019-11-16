@@ -214,12 +214,34 @@ public class Database {
         try {
             PreparedStatement ps = getConnection().prepareStatement("select * from file_info");
             ResultSet rs = ps.executeQuery();
-            return DtoUtils.convertToFileInfo(rs);
+            List<FileInfo> result = DtoUtils.convertToFileInfo(rs);
+            for(FileInfo f : result) {
+                f.setCommentList(findCommentByFileId(f.getId()));
+            }
+            return result;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
+
+    public static List<FileInfo> getFilesByOwnerFlag(Long userId, boolean isOwner) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("select fi.* from file_info fi join user_file uf on uf.file_info_id = fi.id where uf.user_id = ? and uf.owner_flag = ?");
+            ps.setLong(1,userId);
+            ps.setBoolean(2, isOwner);
+            ResultSet rs = ps.executeQuery();
+            List<FileInfo> result = DtoUtils.convertToFileInfo(rs);
+            for(FileInfo f : result) {
+                f.setCommentList(findCommentByFileId(f.getId()));
+            }
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public static List<UserFileInfo> findUserFilesByUserId(Long userId) {
         try {

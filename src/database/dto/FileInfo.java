@@ -3,6 +3,7 @@ package database.dto;
 import webapp.FileUploadHandler;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Created by Jakub on 6.11.2019.
@@ -12,6 +13,7 @@ public class FileInfo {
     private Long id;
     private String fileName;
     private String mac;
+    private List<Comment> commentList;
 
     private File file;
 
@@ -46,4 +48,11 @@ public class FileInfo {
         return file;
     }
 
+    public List<Comment> getCommentList() {
+        return commentList;
+    }
+
+    public void setCommentList(List<Comment> commentList) {
+        this.commentList = commentList;
+    }
 }

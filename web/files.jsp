@@ -17,6 +17,10 @@
 </head>
 <body>
 <%@include file="navbar.jsp" %>
+<%
+    String filter = request.getAttribute("filter") != null ? (String)request.getAttribute("filter") : null;
+    String searchText = request.getAttribute("searchText") != null ? (String)request.getAttribute("searchText") : null;
+%>
 <section class="section">
     <div class="container">
 
@@ -26,25 +30,43 @@
 
                 <h2 class="title">List of uploaded files</h2>
 
-                <%--TODO--%>
-                <%--Treba nastavit form action na Filter sluzbu--%>
-                <form>
+                <form action="files" method="post">
                     <div class="control">
                         <label class="radio">
-                            <input type="radio" name="filter" checked>
+                            <input type="radio" name="filter" value="my" <%
+                                if(filter == null || "my".equals(filter)) {
+                            %> checked <%
+                                }
+                            %>
+                            >
                             My files
                         </label>
                         <label class="radio">
-                            <input type="radio" name="filter">
+                            <input type="radio" name="filter" value="shared" <%
+                                if("shared".equals(filter)) {
+                            %> checked <%
+                                }
+                            %>
+                            >
                             Shared files
                         </label>
                         <label class="radio">
-                            <input type="radio" name="filter">
+                            <input type="radio" name="filter" value="all"
+                                <%
+                                if("all".equals(filter)) {
+                            %> checked <%
+                                }
+                            %>
+                            >
                             All files
                         </label>
                     </div>
                     <div class="control">
-                        <input class="input" type="text" placeholder="Search">
+                        <input class="input" name="searchText" type="text"
+                            <%if(searchText != null) {
+                            %> value="<%= searchText%>" <%
+                            }
+                            %> placeholder="Search">
                     </div>
                     <button class="button is-dark is-fullwidth" type="submit" name="filterSubmit">
                         <span class="icon is-small"><i class="fas fa-search"></i></span>
