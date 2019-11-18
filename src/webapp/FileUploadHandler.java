@@ -13,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import java.util.List;
 
 public class FileUploadHandler extends HttpServlet {
     public static String UPLOAD_DIRECTORY = "files";
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -67,9 +69,13 @@ public class FileUploadHandler extends HttpServlet {
                 AsyncCrypto.encUserFile(loggedUser,file,fileName, true);
                 //sifrovanie zdielanych
                 if (!usersShare.isEmpty()){
+                    HttpSession session = request.getSession(false);
+                    String privateKey = (String)session.getAttribute("privateKey");
+
+
                     for (User u: usersShare) {
                         UserFileInfo userFileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), file.getName());
-                        AsyncCrypto.shareFile(loggedUser, u, userFileInfo);
+                        AsyncCrypto.shareFile(loggedUser, u, userFileInfo, privateKey);
                     }
                 }
 

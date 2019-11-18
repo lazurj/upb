@@ -229,14 +229,15 @@ public class AsyncCrypto {
         return hexString.toString();
     }
 
-    public static boolean shareFile(User owner, User user, UserFileInfo ownerFile){
+    public static boolean shareFile(User owner, User user, UserFileInfo ownerFile, String privateKey){
         try {
             AsyncCrypto asyncCrypto = new AsyncCrypto();
 
             String hashKey = ownerFile.getHashKey();
             byte[] data = Base64.getDecoder().decode(hashKey);
             String fullKey = null;
-            PrivateKey pk = asyncCrypto.getPrivateKey(owner.getPrivateKey());
+            //PrivateKey pk = asyncCrypto.getPrivateKey(owner.getPrivateKey());
+            PrivateKey pk = asyncCrypto.getPrivateKey(privateKey);
             if (pk != null) {
                 fullKey = asyncCrypto.decrypt(data, pk);
                 //generovanie symetrickeho kluca

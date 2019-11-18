@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +44,10 @@ public class FileInfoServlet extends HttpServlet {
                 Request req = Database.findRequestsById(Long.valueOf(reqId));
                 UserFileInfo userFileInfo = Database.findUserFilesByUserIdAndFileId(req.getOwnerId(), req.getFileId());
                 if(loggedUser.getId().equals(req.getOwnerId())) {
-                    AsyncCrypto.shareFile(loggedUser, req.getRequestUser(), userFileInfo);
+
+                    HttpSession session = request.getSession(false);
+                    String privateKey = (String)session.getAttribute("privateKey");
+                    AsyncCrypto.shareFile(loggedUser, req.getRequestUser(), userFileInfo,privateKey);
                     Database.deactivateRequest(req.getId());
                 }
             }
