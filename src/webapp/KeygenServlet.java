@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 
 public class KeygenServlet extends HttpServlet {
@@ -17,14 +18,18 @@ public class KeygenServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         User loggedUser = DtoUtils.getLoggedUser(request);
+
+
         if(loggedUser == null) {
             response.sendRedirect("./");
             //request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
+        HttpSession session = request.getSession(false);
+        String privateKey = (String)session.getAttribute("privateKey");
 
         if ("download".equals(request.getParameter("b"))) {
-            String privateKey = request.getParameter("privateKey");
+
             String publicKey = request.getParameter("publicKey");
 
             File keyFile = new File("key_generator.txt");
@@ -68,8 +73,9 @@ public class KeygenServlet extends HttpServlet {
 //            publicKey = asyncCrypto.PublicKeyString();
 
             //CryptoUtils.setpublicKey(publicKey,privateKey);
-
-            request.setAttribute("privateKey", user.getPrivateKey());
+            HttpSession session = request.getSession(false);
+            String privateKey = (String)session.getAttribute("privateKey");
+            request.setAttribute("privateKey", privateKey);
             request.setAttribute("publicKey", user.getPublicKey());
             request.getRequestDispatcher("/keygen.jsp").forward(request, response);
 

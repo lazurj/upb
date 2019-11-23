@@ -4,6 +4,7 @@ import database.Database;
 import database.dto.User;
 import database.dto.UserFileInfo;
 import database.dto.Util.DtoUtils;
+import org.apache.commons.io.FileUtils;
 import webapp.utils.AsyncCrypto;
 import webapp.utils.CryptoUtils;
 
@@ -17,6 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -120,8 +125,50 @@ public class DecryptServlet extends HttpServlet {
 
                 /* hash to header - end */
 
+                //DORABAM
+                File fooFile = new File (file.getName());
+                FileUtils.copyFile(file,fooFile);
 
-                FileInputStream in = new FileInputStream(file);
+                byte [] foo = Files.readAllBytes(Paths.get(fooFile.getPath()));
+
+                ByteBuffer buf = ByteBuffer.wrap(foo);
+                int hashlength = buf.getInt();
+                byte[] hashMAC =  new byte[hashlength];
+                buf.get(hashMAC);
+
+                byte[] data = new byte[buf.remaining()];
+                buf.get(data);
+
+
+
+                byte [] fooadd = Files.readAllBytes(Paths.get(fooFile.getPath()));
+                UserFileInfo fileInfo = DtoUtils.getUserFileByName(Database.findUserFilesByUserId(loggedUser.getId()), fileName);
+                String s = fileInfo.getHashKey();
+                byte[] encKey = Base64.getDecoder().decode(s);
+
+
+                ByteBuffer bufadd = ByteBuffer.allocateDirect(fooadd.length+hashMAC.length+4+encKey.length+4);
+                int hashofFileLength = hashMAC.length;
+                bufadd.putInt(hashMAC.length);
+
+                bufadd.put(hashMAC);
+                bufadd.putInt(encKey.length);
+                bufadd.put(encKey);
+                bufadd.put(data);
+
+                FileChannel wChannel = new FileOutputStream(fooFile, false).getChannel();
+                bufadd.flip();
+                wChannel.write(bufadd);
+
+                wChannel.close();
+
+
+                //
+
+
+
+
+                FileInputStream in = new FileInputStream(fooFile);
                 response.setHeader("Content-disposition", "attachment; filename=" + fileName);
                 OutputStream outFile = response.getOutputStream();
                 byte[] buffer = new byte[4096];
